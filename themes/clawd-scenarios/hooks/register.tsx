@@ -45,11 +45,11 @@ function themeFor(key: ScenarioKey): ThemeColors {
     label: `Clawd · ${SCENARIOS[key].title}`,
     roles: { accent: SCENARIOS[key].accent, danger: '#ae3c38', success: '#426d48', warning: '#94651d', pro: '#73538b' },
     light: { gray: { anchors: {
-      'surface-0': light.bg, 'surface-1': lift(light.bg, .2), 'surface-2': lift(light.bg, .4),
+      'surface-0': light.wallmid, 'surface-1': lift(light.wallmid, .2), 'surface-2': lift(light.wallmid, .4),
       'text-primary': light.ink, 'text-secondary': light.ink, 'text-muted': light.soft,
     } } },
     dark: { gray: { anchors: {
-      'surface-0': dark.bg, 'surface-1': lift(dark.bg, .025), 'surface-2': lift(dark.bg, .05), 'surface-3': lift(dark.bg, .075),
+      'surface-0': dark.wallmid, 'surface-1': lift(dark.wallmid, .025), 'surface-2': lift(dark.wallmid, .05), 'surface-3': lift(dark.wallmid, .075),
       'text-primary': dark.ink, 'text-secondary': dark.ink, 'text-muted': dark.soft,
     } } },
   })
@@ -63,7 +63,7 @@ function sceneId(p: Preferences): string {
 
 function lookFor(p: Preferences): ThemeSetArgs {
   const override = p.appearance === 'auto' ? {} : { overrideColorScheme: p.appearance }
-  return { colors: themeFor(p.scene), ...override, backdrop: { scene: sceneId(p), glass: false } }
+  return { colors: themeFor(p.scene), ...override, backdrop: { scene: sceneId(p), glass: { blur: 14, opacity: .12 } } }
 }
 
 function parseSceneId(value: unknown): Preferences | null {

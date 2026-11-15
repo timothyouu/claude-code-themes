@@ -60,7 +60,7 @@ test('startup applies scene and complete colors without overriding automatic app
   assert.equal(e.commands[0].name, 'clawd-scene');
   assert.equal(e.sets.length, 1);
   assert.equal(e.sets[0].backdrop.scene, 'clawd-scenarios-coffee-auto-motion');
-  assert.equal(e.sets[0].backdrop.glass, false);
+  assert.deepEqual(e.sets[0].backdrop.glass, { blur: 14, opacity: .12 });
   assert(e.sets[0].colors);
   assert(!Object.hasOwn(e.sets[0], 'overrideColorScheme'));
 });
@@ -86,6 +86,19 @@ test('all twelve scene switches apply colors and backdrop and persist across ses
   await command(hooks(mod.register), restart, 'auto motion');
   assert(!Object.hasOwn(restart.sets.at(-1), 'overrideColorScheme'));
   assert.equal(restart.sets.at(-1).backdrop.scene, 'clawd-scenarios-kite-auto-motion');
+});
+
+test('all scenes keep composer glass enabled in both appearances and automatic mode', async () => {
+  const mod=await loadTheme();
+  const { paletteFor }=await import(pathToFileURL(path.join(plugin,'hooks/scene.mjs')));
+  for(const scene of expected) for(const appearance of ['light','dark','auto']){
+    const look=mod.lookFor({scene,appearance,motion:true,enabled:true});
+    assert(look.backdrop.glass && look.backdrop.glass.opacity <= .2, 'composer must reveal the scene instead of forming an opaque footer');
+    assert(look.backdrop.glass.blur >= 0 && look.backdrop.glass.blur <= 20);
+    assert.equal(look.colors.inputs.light['gray-20'].toLowerCase(),paletteFor(scene,'light').wallmid);
+    assert.equal(look.colors.inputs.dark['gray-900'].toLowerCase(),paletteFor(scene,'dark').wallmid);
+    assert.equal(look.overrideColorScheme,appearance==='auto'?undefined:appearance);
+  }
 });
 
 test('off survives restart; on preserves scene, appearance and motion', async () => {

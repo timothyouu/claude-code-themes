@@ -56,7 +56,7 @@ No raster images or fonts are needed at runtime. This is an independent theme co
 
 ## Compatibility
 
-The renderer guards plugin ownership and scene IDs, supports current `scene` and older `id` backdrop props, and sets the host SVG animation flag so desktop SMIL animations run. It avoids Claude's glass effect so reduced-transparency settings cannot obscure the artwork. A mask reduces only the artwork beneath the centered 680-pixel transcript lane to 20% opacity. The wall lighting stays continuous across the full canvas, without a flat rectangular stripe. Text contrast is checked inside this protected lane; narrower windows can place some text over stronger side artwork.
+The renderer guards plugin ownership and scene IDs, supports current `scene` and older `id` backdrop props, and sets the host SVG animation flag so desktop SMIL animations run. It uses Claude's native translucent panel treatment (14px blur, 12% panel opacity) so the composer does not create an opaque bar across the scenery. Native panel colors follow the same cream/navy wall palette. OS accessibility preferences can still override transparency. A mask reduces only the artwork beneath the centered 680-pixel transcript lane to 20% opacity. The wall lighting stays continuous across the full canvas, without a flat rectangular stripe. Text contrast is checked inside this protected lane; narrower windows can place some text over stronger side artwork.
 
 I checked the current solid-mascot build in Claude Desktop 5.11492.5.0 with Claude Code 2.1.325 on Windows. All twelve scenes rendered in both light and dark through the new shortcuts in a maximized 1707 x 1019 window. The 24 native captures show the current mascot and mode selection. Coffee was restored to automatic appearance afterward, and the original draft was left unsent.
 
@@ -76,7 +76,7 @@ node scripts/generate-clawd-previews.mjs
 node scripts/verify-clawd-art.mjs
 ```
 
-The current renderer passed 19 tests, strict TypeScript against the installed Claude SDK, and independent verification of all 72 scene/appearance/motion outputs. The largest SVG is 75,627 characters, below the native 131,072-character limit. All 21 imported modules are below 1 MiB. Tested text contrast inside the protected lane is at least 4.68:1.
+The current renderer passed 20 tests, strict TypeScript against the installed Claude SDK, and independent verification of all 72 scene/appearance/motion outputs. The largest SVG is 75,627 characters, below the native 131,072-character limit. All 21 imported modules are below 1 MiB. Tested text contrast inside the protected lane is at least 4.68:1.
 
 Generating optional PNG previews requires an existing Sharp installation. Neither script installs packages:
 

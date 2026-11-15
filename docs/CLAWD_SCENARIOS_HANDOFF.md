@@ -57,3 +57,9 @@ Texture, lighting, scale, motion, shortcuts, and mascot corrections followed exp
 The GitHub branch and PR are intended for review before merging. No merge is part of this handoff. The user can use the local installation; the default marketplace branch includes this option after the PR is merged. Recheck compatibility if Claude's early-access mod API changes.
 
 An older inline Golden Gate build also loads in the existing session. Its `/golden-gate off` returned help instead of disabling that older mod. Reapplying `/clawd-scene coffee` restored Clawd. A new-session ordering conflict was not reproduced; the older inline mod was not edited or removed.
+
+## Composer continuity correction
+
+The opaque footer in the user's screenshot came from `glass: false`, which left Claude's composer panel opaque, combined with panel colors based on the earlier olive scene background. The fix enables the supported native glass treatment with 14px blur and 12% opacity and anchors native panels to the cream/navy wall midpoint. It applies to all twelve scenes in light, dark, and automatic modes. The artwork and motion are unchanged.
+
+Twenty tests and strict native SDK TypeScript pass, including a regression that requires a translucent composer and panel colors matching the wall in every mode. Native expanded-composer verification is pending while another Claude session uses the desktop. No OS transparency setting was changed.
