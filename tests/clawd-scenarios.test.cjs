@@ -178,30 +178,31 @@ test('all scenes have resolved live motion and distinct readable light/dark pale
 });
 
 
-test('primary and muted text inside the protected transcript lane survive thirty percent artwork', async () => {
+test('continuous gradient wall stays behind protected chat furniture', async () => {
   const { paletteFor, buildScene } = await import(pathToFileURL(path.join(plugin, 'hooks/scene.mjs')));
-  const composite = (background, foreground) => '#' + background.match(/[a-f0-9]{2}/gi)
-    .map(channel => Math.round(parseInt(channel, 16) * .7 + foreground * .3).toString(16).padStart(2, '0')).join('');
-  for (const key of expected) {
-    for (const scheme of ['light', 'dark']) {
-      const palette = paletteFor(key, scheme);
-      const worstBackdrop = composite(palette.bg, scheme === 'light' ? 0 : 255);
-      const svg = buildScene(key, scheme, true);
-      // The user requested more visible furniture, including beneath the chat.
-      // Protect the central 680px at 70% background coverage. Art outside this
-      // lane remains stronger; this bound applies only inside the protected lane.
-      const veil = svg.match(/<svg x="50%" y="0" width="1" height="100%" overflow="visible">(<rect[^>]+\/>)<\/svg><\/svg>$/);
-      assert(veil, key + ' ' + scheme + ': centered native-width transcript veil');
-      assert.match(veil[1], /\bx="-340"/);
-      assert.match(veil[1], /\bwidth="680"/);
-      assert.match(veil[1], /\bheight="100%"/);
-      assert.match(veil[1], /\bopacity="(?:0?\.70?)"/);
-      assert(veil[1].includes('fill="' + palette.bg + '"'));
-      for (const role of ['ink', 'soft']) {
-        const ratio = contrast(palette[role], worstBackdrop);
-        assert(ratio >= 4.5, key + ' ' + scheme + ' ' + role + ' overlap contrast ' + ratio.toFixed(2));
-      }
+  const channels = color => color.match(/[a-f0-9]{2}/gi).map(value => parseInt(value,16));
+  const hex = values => '#' + values.map(value => Math.round(value).toString(16).padStart(2,'0')).join('');
+  for (const key of expected) for (const scheme of ['light','dark']) {
+    const palette = paletteFor(key,scheme);
+    const svg = buildScene(key,scheme,true);
+    assert(!svg.includes('room-print') && !svg.includes('wall-print'), 'no dotted wallpaper');
+    assert.match(svg, /<linearGradient id="room-wall"/);
+    for (const layer of ['wall','cool','rose','floor','corner']) assert(svg.includes(`width="100%" height="100%" fill="url(#room-${layer})"`));
+    assert.match(svg, /<g mask="url\(#chat-protection\)"><svg x="0"/);
+    assert.match(svg, /<rect x="-340" width="680" height="100%" fill="black" opacity=".80"/);
+    assert.match(svg, /viewBox="0 -200 320 1000"/);
+    assert.match(svg, /viewBox="-60 -200 320 1000"/);
+    // Bound every possible continuous-lighting color, then allow 20% extreme
+    // artwork through the mask. Peaks are conservatively allowed to coincide.
+    const walls = ['walltop','wallmid','wallbottom'].map(role => channels(palette[role]));
+    const extreme = scheme === 'light' ? Math.min : Math.max;
+    let bound = walls[0].map((_,index) => extreme(...walls.map(wall => wall[index])));
+    for (const [role,alpha] of [['glowcool',.22],['glowrose',.15],['glowfloor',.22],['shade',.10]]) {
+      const color=channels(palette[role]);
+      bound=bound.map((value,index) => extreme(value,value*(1-alpha)+color[index]*alpha));
     }
+    const backdrop=hex(bound.map(value => value*.8+(scheme==='light'?0:255)*.2));
+    for (const role of ['ink','soft']) assert(contrast(palette[role],backdrop)>=4.5, key+' '+scheme+' '+role+' gradient overlap contrast');
   }
 });
 

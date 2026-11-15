@@ -1,3 +1,5 @@
+// Cream wall colors and layered lighting adapted from the MIT rainy-window
+// theme by Ishu Agrawal (ae7d9d6); see reference-texture.LICENSE and NOTICE.
 import { scenesA } from './scenes-a.mjs';
 import { scenesB } from './scenes-b.mjs';
 import { DITHERED_SCENES } from './dithered.mjs';
@@ -10,6 +12,13 @@ export function paletteFor(key, appearance = 'light') {
   const dark = appearance === 'dark';
   return {
     bg: dark ? scene.dark : scene.light,
+    walltop: dark ? '#17182d' : '#f2ece2',
+    wallmid: dark ? '#1d1c32' : '#efe7db',
+    wallbottom: dark ? '#292137' : '#eedfca',
+    glowcool: dark ? '#4b58ac' : '#bcc8ee',
+    glowrose: dark ? '#884d85' : '#efc9d6',
+    glowfloor: dark ? '#bb7855' : '#f3d3b1',
+    shade: dark ? '#080b1b' : '#c9b596',
     ink: dark ? '#fff8e8' : '#292821',
     soft: dark ? '#faf3e4' : '#34332b',
     accent: scene.accent,
@@ -41,10 +50,15 @@ export function buildScene(key = 'coffee', appearance = 'auto', motion = true) {
   const rightMotion = motion ? sceneMotion(key, 'right') : '';
   const rightArt = mascotEyes(art.right, key, motion);
   const actor = art.actor ? `<g data-actor="skateboard-rider">${motion ? '<animateTransform attributeName="transform" type="translate" values="0 0;30 0;0 0;-30 0;0 0" dur="10s" repeatCount="indefinite"/>' : ''}${mascotEyes(art.actor, key, motion)}</g>` : '';
-  const print = '<rect width="260" height="800" fill="url(#room-cool)"/><rect width="260" height="800" fill="url(#room-warm)"/><rect width="260" height="800" fill="url(#room-print)"/>';
-  // A fixed transcript veil also protects text when Claude's conversation spans
-  // most of a narrow window. Wide windows retain stronger art outside this lane.
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="color-scheme:${appearance === 'auto' ? 'light dark' : appearance}" fill="none"><defs><pattern id="room-print" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r=".75" fill="var(--line)" opacity=".16"/></pattern><radialGradient id="room-cool" cx=".5" cy=".23" r=".85"><stop offset="0" stop-color="var(--cool)" stop-opacity=".16"/><stop offset="1" stop-color="var(--cool)" stop-opacity="0"/></radialGradient><radialGradient id="room-warm" cx=".5" cy="1" r=".8"><stop offset="0" stop-color="var(--warm)" stop-opacity=".20"/><stop offset="1" stop-color="var(--warm)" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="var(--bg)"/><svg x="0" y="0" width="25%" height="100%" viewBox="0 0 260 800" preserveAspectRatio="xMinYMax meet" overflow="hidden">${print}${art.left}${leftMotion}</svg><svg x="75%" y="0" width="25%" height="100%" viewBox="0 0 260 800" preserveAspectRatio="xMaxYMax meet" overflow="hidden">${print}${rightArt}${actor}${rightMotion}</svg><svg x="50%" y="0" width="1" height="100%" overflow="visible"><rect x="-340" width="680" height="100%" fill="var(--bg)" opacity=".70"/></svg></svg>`;
+  // Continuous room lighting comes from the reference's cream wall, cool window,
+  // rose bounce, and warm floor. Only the objects carry a fine printed texture.
+  const radial = (id, role, cx, cy, r, alpha) => `<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="${r}"><stop offset="0" stop-color="var(--${role})" stop-opacity="${alpha}"/><stop offset=".45" stop-color="var(--${role})" stop-opacity="${alpha * .42}"/><stop offset="1" stop-color="var(--${role})" stop-opacity="0"/></radialGradient>`;
+  const lighting = radial('room-cool','glowcool',.9,.2,.6,.22) + radial('room-rose','glowrose',.12,.14,.55,.15) + radial('room-floor','glowfloor',.5,1.05,.7,.22);
+  const corner = '<linearGradient id="room-corner"><stop offset="0" stop-color="var(--shade)" stop-opacity=".10"/><stop offset=".13" stop-color="var(--shade)" stop-opacity="0"/><stop offset=".87" stop-color="var(--shade)" stop-opacity="0"/><stop offset="1" stop-color="var(--shade)" stop-opacity=".10"/></linearGradient>';
+  // Mask only the furniture beneath the transcript, so its background lighting
+  // stays continuous and does not acquire a flat rectangular stripe.
+  const mask = '<mask id="chat-protection" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect width="100%" height="100%" fill="white"/><svg x="50%" y="0" width="1" height="100%" overflow="visible"><rect x="-340" width="680" height="100%" fill="black" opacity=".80"/></svg></mask>';
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="color-scheme:${appearance === 'auto' ? 'light dark' : appearance}" fill="none"><defs><linearGradient id="room-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--walltop)"/><stop offset=".55" stop-color="var(--wallmid)"/><stop offset="1" stop-color="var(--wallbottom)"/></linearGradient>${lighting}${corner}${mask}</defs><rect width="100%" height="100%" fill="url(#room-wall)"/><rect width="100%" height="100%" fill="url(#room-cool)"/><rect width="100%" height="100%" fill="url(#room-rose)"/><rect width="100%" height="100%" fill="url(#room-floor)"/><rect width="100%" height="100%" fill="url(#room-corner)"/><g mask="url(#chat-protection)"><svg x="0" y="0" width="25%" height="100%" viewBox="0 -200 320 1000" preserveAspectRatio="xMinYMax meet" overflow="hidden">${art.left}${leftMotion}</svg><svg x="75%" y="0" width="25%" height="100%" viewBox="-60 -200 320 1000" preserveAspectRatio="xMaxYMax meet" overflow="hidden">${rightArt}${actor}${rightMotion}</svg></g></svg>`;
   svg = svg.replace(/var\(--([a-z]+)\)/g, (_match, name) => {
     if (!(name in colors)) throw new Error(`Unknown scene color: ${name}`);
     return appearance === 'auto' ? `light-dark(${light[name]},${dark[name]})` : colors[name];

@@ -85,10 +85,20 @@ assert.match(license, /THE SOFTWARE IS PROVIDED "AS IS"/);
 assert.match(fs.readFileSync(path.join(hooks, 'reference-texture.mjs'), 'utf8'), /Adapted from rainy-window\/hooks\/scene\.ts[\s\S]*reference-texture\.LICENSE/);
 const referenceLicense = path.resolve(path.dirname(referenceScene), '../LICENSE');
 if (fs.existsSync(referenceLicense)) assert.equal(license.trim(), fs.readFileSync(referenceLicense, 'utf8').trim());
-const recipe = createReferenceTexture('verifier-recipe');
+const textureScale = .45;
+const texturePitch = PITCH * textureScale;
+const unitRecipe = createReferenceTexture('verifier-unit', 1);
+assert.match(unitRecipe.dline('M0 0L12 12', 'ink'), /stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0 6"/);
+const recipe = createReferenceTexture('verifier-recipe', textureScale);
 const cachedPaints = expectedRadii.map((_radius, density) => recipe.dotPaint(density, 'cool'));
 assert.equal(recipe.dotPaint(2, 'cool'), cachedPaints[2], 'Identical density/paint must reuse its pattern');
-assert.match(recipe.dline('M0 0L12 12', 'ink'), /stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0 6"/);
+assert.match(recipe.dline('M0 0L12 12', 'ink'), /stroke-width="2.07" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0 2.7"/);
+assert.match(recipe.dline('M0 0L12 12', 'ink', 3.8), /stroke-width="1.71"/);
+assert.deepEqual([...recipe.patterns().matchAll(/<circle[^>]*\br="([\d.]+)"/g)].map(match => Number(match[1])), expectedRadii.map(radius => Number((radius * textureScale).toFixed(4))), 'All rendered densities must scale from the original radii by .45');
+assert([...recipe.patterns().matchAll(/<pattern\b[^>]*>/g)].every(match => match[0].includes(`width="${texturePitch}"`) && match[0].includes(`height="${texturePitch}"`)));
+const defaultRecipe = createReferenceTexture('verifier-default');
+defaultRecipe.dotPaint(0, 'ink');
+assert.match(defaultRecipe.patterns(), /width="2.7" height="2.7"/);
 const defaultRings = recipe.halftone((scale, density) => `<rect data-test-scale="${scale}" data-test-density="${density}" fill="var(--cool)"/>`);
 assert.deepEqual([...defaultRings.matchAll(/data-test-scale="([\d.]+)" data-test-density="(\d+)"/g)].map(match => [Number(match[1]), Number(match[2])]), [[1.5,3],[1.25,2],[1,0]]);
 assert(!defaultRings.includes('fill="var(--'), 'Halftone layers must use actual dot patterns');
@@ -115,10 +125,18 @@ for (const key of expected) {
   let weakest = Infinity;
   for (const mode of ['light', 'dark']) {
     const palette = paletteFor(key, mode);
-    // This bound applies only to the protected 680px text lane. The user's
-    // selected layout intentionally permits stronger artwork outside that lane.
+    // Bound each channel independently across the continuous wall and every
+    // optional glow/shade. This deliberately permits all radial peaks to
+    // coincide, then adds worst-case art at the protected lane's .20 opacity.
+    const stops = ['walltop', 'wallmid', 'wallbottom'].map(role => rgb(palette[role]));
+    const choose = mode === 'light' ? Math.min : Math.max;
+    let gradientBound = [0, 1, 2].map(channel => choose(...stops.map(color => color[channel])));
+    for (const [role, alpha] of [['glowcool', .22], ['glowrose', .15], ['glowfloor', .22], ['shade', .10]]) {
+      const color = rgb(palette[role]);
+      gradientBound = gradientBound.map((channel, index) => choose(channel, channel * (1-alpha) + color[index] * alpha));
+    }
     const extreme = mode === 'light' ? 0 : 255;
-    const worstBackground = rgb(palette.bg).map(channel => channel * .7 + extreme * .3);
+    const worstBackground = gradientBound.map(channel => channel * .8 + extreme * .2);
     for (const role of ['ink', 'soft']) {
       const ratio = contrast(rgb(palette[role]), worstBackground);
       weakest = Math.min(weakest, ratio);
@@ -144,7 +162,7 @@ for (const key of expected) {
       assert(!svg.includes('var(--'), `${key}/${mode}: unresolved CSS variables`);
       assert(!svg.includes('undefined') && !svg.includes('NaN'), `${key}/${mode}: invalid generated values`);
       assert.equal(/<animate(?:Transform|Motion)?\b/.test(svg), motion, `${key}/${mode}: motion flag must govern animation`);
-      const paint_values = Object.fromEntries(['ink', 'soft', 'cool', 'accent', 'warm', 'leaf', 'panel', 'line', 'paper'].map(role => [role, mode === 'auto' ? `light-dark(${paletteFor(key, 'light')[role]},${paletteFor(key, 'dark')[role]})` : paletteFor(key, mode)[role]]));
+      const paint_values = Object.fromEntries(['ink', 'soft', 'cool', 'accent', 'warm', 'leaf', 'panel', 'line', 'paper', 'walltop', 'wallmid', 'wallbottom', 'glowcool', 'glowrose', 'glowfloor', 'shade'].map(role => [role, mode === 'auto' ? `light-dark(${paletteFor(key, 'light')[role]},${paletteFor(key, 'dark')[role]})` : paletteFor(key, mode)[role]]));
       documents.push({ label: `${key}/${mode}/${motion ? 'motion' : 'still'}`, svg, kind: 'scene', scene: key, motion, paint_values });
     }
   }
@@ -178,6 +196,8 @@ def name(element):
 
 ART_ROLES = {'ink', 'soft', 'cool', 'accent', 'warm', 'leaf', 'panel', 'line', 'paper'}
 RADII = [2.6, 2.1, 1.6, 1.15, .75]
+TEXTURE_SCALE = .45
+TEXTURE_PITCH = 6 * TEXTURE_SCALE
 used_art_roles = set()
 art_sources = {}
 glass_windows = 0
@@ -203,12 +223,12 @@ def validate_art(document, root, global_patterns=None):
     for pattern in local_patterns.values():
         role = pattern.get('data-paint')
         assert role in ART_ROLES | {'mascot'}, label + ': density pattern needs known semantic or mascot paint'
-        assert pattern.get('width') == '6' and pattern.get('height') == '6' and pattern.get('patternUnits') == 'userSpaceOnUse', label + ': freckle patterns must retain upstream 6px pitch'
+        assert math.isclose(float(pattern.get('width')),TEXTURE_PITCH) and math.isclose(float(pattern.get('height')),TEXTURE_PITCH) and pattern.get('patternUnits') == 'userSpaceOnUse', label + ': rendered freckle pitch must be .45 of upstream'
         assert len(pattern) == 1 and name(pattern[0]) == 'circle', label + ': real reference patterns contain one dot only, with no wash rectangle'
         density = int(pattern.get('data-density', '-1'))
         assert 0 <= density < 5 and pattern.get('data-texture') == 'density-' + str(density), label + ': missing exact reference density metadata'
         dot = pattern[0]
-        assert dot.get('cx') == '3' and dot.get('cy') == '3' and math.isclose(float(dot.get('r', '0')), RADII[density]), label + ': dot differs from exact upstream radius or center'
+        assert math.isclose(float(dot.get('cx')),TEXTURE_PITCH/2) and math.isclose(float(dot.get('cy')),TEXTURE_PITCH/2) and math.isclose(float(dot.get('r','0')),RADII[density]*TEXTURE_SCALE,abs_tol=.00005), label + ': rendered dot must retain the upstream radius/spacing ratio'
         expected = '#d77c5c' if role == 'mascot' else paints[role]
         assert dot.get('fill') == expected, label + ': freckle paint must match its role'
         assert dot.get('opacity', '1') == '1', label + ': native reference density dots must be solid'
@@ -239,7 +259,7 @@ def validate_art(document, root, global_patterns=None):
         assert not any(attribute in element.attrib for attribute in ('style', 'mask', 'shape-rendering')), label + ': unsupported rendering controls'
         assert element.get('data-cells') is None and element.get('data-glyph') is None, label + ': old point-cell approximation remains'
         if element.get('data-dither'):
-            assert element.get('data-dither') == '6px-freckled-reference' and element.get('data-texture') == 'freckled-v4', label + ': expected actual freckle recipe'
+            assert element.get('data-dither') == 'fine-freckled-reference' and element.get('data-texture') == 'freckled-v5', label + ': expected actual freckle recipe'
         for attribute in ('fill', 'stroke'):
             paint = element.get(attribute)
             if paint is None or paint == 'none':
@@ -264,12 +284,14 @@ def validate_art(document, root, global_patterns=None):
                     # not continuous furniture outlines.
                     assert element.get('d') == 'M23 27l10 10m0-10L23 37m29-10 10 10m0-10L52 37', label + ': unexpected solid facial accent'
                 elif document['kind'] in ('art', 'actor'):
-                    assert element.get('data-texture') == 'dline' and element.get('stroke-dasharray') == '0 6' and element.get('stroke-linecap') == 'round' and element.get('stroke-linejoin') == 'round', label + ': authored strokes must use the upstream dotted-line recipe, not continuous outlines'
+                    assert element.get('data-texture') == 'dline' and element.get('stroke-dasharray') == '0 2.7' and element.get('stroke-linecap') == 'round' and element.get('stroke-linejoin') == 'round', label + ': authored strokes must use the upstream dotted-line recipe, not continuous outlines'
                     printed_edges.append(element)
             if tag in ('circle', 'ellipse') or (tag == 'path' and re.search('[AaCcQqSsTt]', element.get('d', ''))):
                 rounded.append(element)
+        if element.get('data-texture') == 'printed-edge':
+            assert 4.4*TEXTURE_SCALE-.0001 <= float(element.get('stroke-width','0')) <= 4.6*TEXTURE_SCALE+.0001, label + ': printed edges must scale from the original dot widths'
         if element.get('data-texture') == 'dline':
-            assert element.get('stroke-dasharray') == '0 6' and element.get('stroke-linecap') == 'round' and element.get('stroke-linejoin') == 'round', label + ': adapted dotted lines differ from upstream pitch/caps'
+            assert element.get('stroke-dasharray') == '0 2.7' and element.get('stroke-linecap') == 'round' and element.get('stroke-linejoin') == 'round', label + ': adapted dotted lines differ from upstream pitch/caps'
         if element.get('data-mascot'):
             assert re.fullmatch(r'[MmLlHhVvZz0-9.,+\-\s]+', element.get('d', '')), label + ': mascot pixel silhouette was altered'
             if element.get('data-mascot') == 'body':
@@ -281,6 +303,25 @@ def validate_art(document, root, global_patterns=None):
         for child in element:
             walk(child, in_defs)
     walk(root)
+    for parent in root.iter():
+        children = list(parent)
+        for index, outer in enumerate(children):
+            if outer.get('data-texture') != 'edge-ring' or outer.get('data-density') != '4':
+                continue
+            assert index+2 < len(children), label + ': edge rings must surround a material silhouette'
+            inner, material = children[index+1:index+3]
+            assert inner.get('data-texture') == 'edge-ring' and inner.get('data-density') == '3' and material.get('data-texture') == 'material', label + ': reference rings must order sparse outer, intermediate, dense material'
+            for ring, growth in ((outer,1.7),(inner,.85)):
+                assert name(ring) == name(material), label + ': ring and material silhouettes differ'
+                if name(material) == 'rect':
+                    comparisons = [('x',-growth),('y',-growth),('width',growth*2),('height',growth*2)]
+                elif name(material) == 'circle':
+                    comparisons = [('r',growth)]
+                elif name(material) == 'ellipse':
+                    comparisons = [('rx',growth),('ry',growth)]
+                else:
+                    raise AssertionError(label + ': unsupported expanded silhouette')
+                assert all(math.isclose(float(ring.get(key,'0')),float(material.get(key,'0'))+offset,abs_tol=.015) for key,offset in comparisons), label + ': object-edge rings must use the reduced 1.7/.85 growth'
     if document['kind'] == 'art':
         assert 10 <= len(visible) <= 2000, label + ': expected composed source geometry, not an enormous point cloud'
         assert len(printed_edges) >= 3 and rounded, label + ': authored contours or reference printed edges are missing'
@@ -318,51 +359,51 @@ def check_scene(document, root):
     ids = [element.get('id') for element in root.iter() if element.get('id')]
     assert len(ids) == len(set(ids)), label + ': cross-layer IDs collide'
     patterns = {element.get('id'): element for element in root.iter() if name(element) == 'pattern'}
-    gradients = {element.get('id'): element for element in root.iter() if name(element) in ('radialGradient', 'linearGradient')}
-    assert set(gradients) == {'room-cool','room-warm'}, label + ': only the two controlled root ambient gradients are allowed'
-    for identity, role, alpha, cy, radius in [('room-cool','cool',.16,.23,.85),('room-warm','warm',.20,1,.8)]:
+    assert 'room-print' not in patterns and not any(element.get('data-texture') == 'wall-print' for element in root.iter()), label + ': background wallpaper dots must be absent'
+    definitions = next(element for element in root if name(element) == 'defs')
+    gradients = {element.get('id'): element for element in root.iter() if name(element) in ('radialGradient','linearGradient')}
+    assert set(gradients) == {'room-wall','room-cool','room-rose','room-floor','room-corner'}, label + ': background must use only its five controlled continuous gradients'
+    assert all(element in definitions for element in gradients.values()), label + ': background gradients must be defined directly at root'
+    wall = gradients['room-wall']
+    assert name(wall) == 'linearGradient' and [wall.get(key) for key in ('x1','y1','x2','y2')] == ['0','0','0','1'], label + ': wall must shade continuously from top to bottom'
+    assert len(wall) == 3, label + ': wall needs its three graduated colors'
+    for stop, offset, role in zip(wall,[0,.55,1],['walltop','wallmid','wallbottom']):
+        assert name(stop) == 'stop' and math.isclose(float(stop.get('offset')),offset) and stop.get('stop-color') == paints[role] and float(stop.get('stop-opacity','1')) == 1, label + ': wall stop differs from its semantic palette'
+    for identity, role, alpha, cx, cy, radius in [('room-cool','glowcool',.22,.9,.2,.6),('room-rose','glowrose',.15,.12,.14,.55),('room-floor','glowfloor',.22,.5,1.05,.7)]:
         gradient = gradients[identity]
-        assert name(gradient) == 'radialGradient' and gradient in root.find('{http://www.w3.org/2000/svg}defs'), label + ': ambient gradients must be defined directly at root'
-        assert math.isclose(float(gradient.get('cx')), .5) and math.isclose(float(gradient.get('cy')),cy) and math.isclose(float(gradient.get('r')),radius), label + ': ambient gradient geometry changed'
-        assert len(gradient) == 2, label + ': ambient gradient must have two controlled stops'
-        first, last = gradient
-        assert first.get('offset') == '0' and last.get('offset') == '1' and first.get('stop-color') == paints[role] and last.get('stop-color') == paints[role] and math.isclose(float(first.get('stop-opacity')),alpha) and float(last.get('stop-opacity')) == 0, label + ': ambient gradient must remain a subtle semantic-color wash'
-    paint_servers = {**patterns, **gradients}
-    wall = patterns.get('room-print')
-    assert wall is not None and wall.get('width') == '6' and wall.get('height') == '6' and len(wall) == 1, label + ': shared wall print must use one dot per 6px tile'
-    dot = wall[0]
-    assert name(dot) == 'circle' and dot.get('cx') == '3' and dot.get('cy') == '3' and math.isclose(float(dot.get('r')), .75) and math.isclose(float(dot.get('opacity')), .16) and dot.get('fill') == paints['line'], label + ': shared wall print recipe changed'
-    margins = [element for element in root.iter() if name(element) == 'svg' and element is not root and element.get('width') == '25%']
-    assert len(margins) == 2 and sorted(element.get('x') for element in margins) == ['0','75%'], label + ': center 50% must remain free of art'
+        assert name(gradient) == 'radialGradient' and all(math.isclose(float(gradient.get(key)),expected) for key,expected in [('cx',cx),('cy',cy),('r',radius)]), label + ': atmospheric glow geometry differs from contrast assumptions'
+        assert len(gradient) == 3, label + ': glow must have three continuous fade stops'
+        for stop,offset,opacity in zip(gradient,[0,.45,1],[alpha,alpha*.42,0]):
+            assert name(stop) == 'stop' and math.isclose(float(stop.get('offset')),offset) and stop.get('stop-color') == paints[role] and math.isclose(float(stop.get('stop-opacity')),opacity), label + ': glow paint/opacity differs from contrast assumptions'
+    corner = gradients['room-corner']
+    assert name(corner) == 'linearGradient' and len(corner) == 4, label + ': edge shade must be continuous'
+    for stop,offset,opacity in zip(corner,[0,.13,.87,1],[.1,0,0,.1]):
+        assert math.isclose(float(stop.get('offset')),offset) and stop.get('stop-color') == paints['shade'] and math.isclose(float(stop.get('stop-opacity')),opacity), label + ': corner shade differs from the conservative contrast bound'
+    background = [element for element in root if name(element) == 'rect']
+    assert [element.get('fill') for element in background] == ['url(#room-wall)','url(#room-cool)','url(#room-rose)','url(#room-floor)','url(#room-corner)'], label + ': full-canvas background layers must retain their order'
+    assert all(element.get('width') == '100%' and element.get('height') == '100%' and element.get('mask') is None for element in background), label + ': continuous background may not be clipped, masked, or replaced with a flat text stripe'
+    masks = [element for element in root.iter() if name(element) == 'mask']
+    assert len(masks) == 1, label + ': exactly one art-only chat protection mask expected'
+    mask = masks[0]
+    assert mask.get('id') == 'chat-protection' and mask in definitions and mask.get('maskUnits') == 'userSpaceOnUse' and mask.get('width') == '100%' and mask.get('height') == '100%', label + ': art protection must use the full canvas'
+    assert len(mask) == 2, label + ': art mask must contain an exterior white field and a centered protected lane'
+    white, center = mask
+    assert name(white) == 'rect' and white.get('fill') == 'white' and white.get('width') == '100%' and white.get('height') == '100%', label + ': art should remain visible outside the chat lane'
+    assert name(center) == 'svg' and center.get('x') == '50%' and center.get('width') == '1' and center.get('height') == '100%' and center.get('overflow') == 'visible' and len(center) == 1, label + ': protected lane must be centered in viewport coordinates'
+    black = center[0]
+    assert name(black) == 'rect' and black.get('x') == '-340' and black.get('width') == '680' and black.get('height') == '100%' and black.get('fill') == 'black' and math.isclose(float(black.get('opacity')),.8), label + ': 680px lane must limit only art to .20 opacity'
+    art_groups = [element for element in root if element.get('mask') == 'url(#chat-protection)']
+    assert len(art_groups) == 1 and name(art_groups[0]) == 'g', label + ': protection mask must wrap only the art group'
+    margins = list(art_groups[0])
+    assert len(margins) == 2 and all(name(element) == 'svg' and element.get('width') == '25%' for element in margins) and sorted(element.get('x') for element in margins) == ['0','75%'], label + ': art margins must leave the central 50% empty'
     for margin in margins:
         side = 'left' if margin.get('x') == '0' else 'right'
-        assert margin.get('overflow') == 'hidden' and margin.get('viewBox') == '0 0 260 800', label + ': clipped 800px margin must retain footer padding'
-        validate_art({'label': label, 'kind': 'scene', 'paint_values': paints}, margin, paint_servers)
-        prints = [element for element in margin if element.get('fill') in ('url(#room-cool)','url(#room-warm)','url(#room-print)')]
-        assert [element.get('fill') for element in prints] == ['url(#room-cool)','url(#room-warm)','url(#room-print)'] and all(element.get('width') == '260' and element.get('height') == '800' for element in prints), label + ': shared ambient fields and room print must remain in each margin'
+        expected_box = '0 -200 320 1000' if side == 'left' else '-60 -200 320 1000'
+        assert margin.get('overflow') == 'hidden' and margin.get('viewBox') == expected_box, label + ': complete rooms must render at the selected smaller scale'
+        validate_art({'label':label,'kind':'scene','paint_values':paints},margin,patterns)
         authored = [element for element in margin if element.get('data-dither')]
-        assert len(authored) == 1, label + ': each margin must retain exactly one original art root'
-        assert canonical(authored[0], paints) == canonical(art_sources[document['scene'] + '/' + side][0], paints), label + ': original room/body/eye geometry was changed beyond blink wrapping'
-    veils = [element for element in root.iter() if name(element) == 'svg' and element.get('x') == '50%' and element.get('overflow') == 'visible']
-    protected = []
-    for veil in veils:
-        assert veil in list(root) and veil.get('width') == '1' and veil.get('height') == '100%', label + ': text veil must use root coordinates'
-        assert all(list(root).index(veil) > list(root).index(margin) for margin in margins), label + ': text veil must paint last'
-        for rectangle in veil:
-            if name(rectangle) == 'rect' and rectangle.get('x') == '-340' and rectangle.get('width') == '680':
-                alpha = float(rectangle.get('opacity','1')) * float(rectangle.get('fill-opacity','1')) * float(veil.get('opacity','1'))
-                assert math.isclose(alpha,.7) and rectangle.get('height') == '100%' and rectangle.get('fill') == next(element for element in root if name(element) == 'rect').get('fill'), label + ': protected 680px lane must retain .70 background veil'
-                protected.append(rectangle)
-    assert len(protected) == 1, label + ': protected text lane is missing'
-    def walk(element, within_margin=False, within_defs=False):
-        tag = name(element)
-        within_margin = within_margin or element in margins
-        within_defs = within_defs or tag == 'defs'
-        if tag in ('path','circle','ellipse','rect','text','image','line','polygon','polyline','use') and not within_margin and not within_defs:
-            assert (tag == 'rect' and element.get('width') == '100%' and element.get('height') == '100%') or element in protected, label + ': room art escaped its margins'
-        for child in element:
-            walk(child,within_margin,within_defs)
-    walk(root)
+        assert len(authored) == 1 and canonical(authored[0],paints) == canonical(art_sources[document['scene']+'/'+side][0],paints), label + ': room/body/eye geometry changed beyond blink wrapping'
+    assert all(element is definitions or element in background or element in art_groups for element in root), label + ': unexpected graphics could introduce a stripe or escape the art margins'
     labels = [element.get('data-motion') for element in root.iter() if element.get('data-motion')]
     assert sorted(labels) == (sorted([document['scene']+'-left',document['scene']+'-right']) if document['motion'] else []), label + ': environmental motion must occur once per side only when enabled'
     actors = [element for element in root.iter() if element.get('data-actor')]
@@ -395,7 +436,7 @@ for document in json.load(sys.stdin):
 assert len(used_art_roles) >= 3, 'Collection must use multiple actual semantic freckle colors'
 assert glass_windows >= 1, 'Expected actual upstream graduated glass recipe in room windows'
 print('Verified reference freckle paints: ' + ', '.join(sorted(used_art_roles)))
-print('Validated exact five-radius dot recipe, original geometry/eye fingerprints, pane-clipped near/far rain, all 25 art layers and 72 outputs; protected lane is 680px at .70.')
+print('Validated original dot ratios at .45 scale, room/eye fingerprints, pane-clipped near/far rain, all 25 art layers and 72 outputs; continuous background is unmasked and the protected 680px art opacity is .20.')
 `;
 const validation = spawnSync('python3', ['-c', python], { input: JSON.stringify(documents), encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
 if (validation.error) throw validation.error;

@@ -85,7 +85,7 @@ function compileLayer(source,prefix) {
         return texture.dline(d,strokeRole,Number(width.toFixed(2)),attrs.trim());
       }
       attrs=put(attrs,'stroke',texture.dotPaint(0,strokeRole));
-      attrs=put(attrs,'stroke-width',4.6);
+      attrs=put(attrs,'stroke-width',2.07);
       attrs=put(attrs,'data-texture','printed-edge');
       return shape(name,attrs);
     }
@@ -101,7 +101,7 @@ function compileLayer(source,prefix) {
       if(strokeRole==='ink' && fillRole!=='ink') edgeRole=fillRole==='paper'?'cool':fillRole==='panel'?'cool':fillRole;
       let edgeAttrs=put(attrs,'fill','none');
       edgeAttrs=put(edgeAttrs,'stroke',texture.dotPaint(0,edgeRole));
-      edgeAttrs=put(edgeAttrs,'stroke-width',4.4);
+      edgeAttrs=put(edgeAttrs,'stroke-width',1.98);
       edgeAttrs=put(edgeAttrs,'data-texture','printed-edge');
       edge=shape(name,edgeAttrs);
     }
@@ -132,7 +132,7 @@ function compileLayer(source,prefix) {
     } else if(canRing) {
       // The reference's halftone recipe layers sparse grown silhouettes around
       // the denser material. A few pixels of growth keeps the margin composed.
-      printed=texture.halftone((growth,ringDensity)=>shape(name,put(put(grow(name,fillAttrs,growth),'data-texture',growth?'edge-ring':'material'),'data-density',ringDensity)),[[3.8,4],[1.9,3],[0,density]]);
+      printed=texture.halftone((growth,ringDensity)=>shape(name,put(put(grow(name,fillAttrs,growth),'data-texture',growth?'edge-ring':'material'),'data-density',ringDensity)),[[1.7,4],[.85,3],[0,density]]);
     } else printed=texture.dotted(density,shape(name,put(fillAttrs,'data-density',density)));
     let wash='';
     if(bounds && bounds.w*bounds.h>8000 && ['cool','panel','warm'].includes(fillRole)) {
@@ -143,10 +143,7 @@ function compileLayer(source,prefix) {
     return clearGlass+wash+printed+edge;
   });
   if(markup.includes('url(#dots)')) markup=markup.replaceAll('url(#dots)',texture.dotPaint(4,'line'));
-  // A faint wall print helps the freckled room read as one setting. The actor
-  // layer stays transparent so its only moving marks are the actual rider.
-  const wall=prefix.endsWith('-actor')?'':`<rect x="0" y="0" width="260" height="760" fill="${texture.dotPaint(4,'line')}" opacity=".13" data-texture="wall-print"/>`;
-  return `<g data-dither="6px-freckled-reference" data-texture="freckled-v4"><defs>${texture.patterns()}</defs>${wall}${markup}</g>`;
+  return `<g data-dither="fine-freckled-reference" data-texture="freckled-v5"><defs>${texture.patterns()}</defs>${markup}</g>`;
 }
 
 function splitSkater(markup) {
@@ -211,4 +208,4 @@ if(args['contact-sheet'] || args['coffee-preview']) {
   }
   if(args['contact-sheet']) await sharp({create:{width:2080,height:Math.ceil(Object.keys(generated).length/4)*800,channels:3,background:palette.paper}}).composite(tiles).png().toFile(args['contact-sheet']);
 }
-console.log(JSON.stringify({output:destination,moduleSizes,totalBytes:Object.values(moduleSizes).reduce((a,b)=>a+b,0),style:'freckled-reference-v4',cell:6,palette,sceneLengths,elapsedMs:Date.now()-started},null,2));
+console.log(JSON.stringify({output:destination,moduleSizes,totalBytes:Object.values(moduleSizes).reduce((a,b)=>a+b,0),style:'fine-freckled-reference-v5',cell:2.7,palette,sceneLengths,elapsedMs:Date.now()-started},null,2));
