@@ -1,0 +1,19 @@
+{
+  "name": "clawd-scenarios",
+  "version": "1.0.0",
+  "description": "Twelve softly animated Clawd scenes with light, dark, and automatic appearance.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Timothy Ou",
+    "url": "https://github.com/timothyouu"
+  },
+  "homepage": "https://github.com/timothyouu/claude-code-themes",
+  "repository": "https://github.com/timothyouu/claude-code-themes",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "theme",
+    "clawd",
+    "animated-background"
+  ]
+}

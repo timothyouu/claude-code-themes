@@ -16,3 +16,22 @@ https://code.claude.com/docs/en/plugins/mods/interface
 
 Claude and Claude Code are products of Anthropic. This is an independent
 community theme, not an official Anthropic product.
+
+Clawd Scenarios
+Scene concepts and character accessories were inspired by:
+https://www.stickermule.com/claudecode
+https://www.youtube.com/watch?v=tRsQsTMvPNg
+The rainy-window reference was inspected at commit
+ae7d9d6d9fb98b2409d26d405dfbc230f2be864a. Room geometry and localized motion
+were authored for this collection. The dotPaint, dotted, dline, and halftone
+texture helpers, cream wall palette, and layered lighting approach were
+adapted from rainy-window/hooks/scene.ts,
+Copyright (c) 2026 Ishu Agrawal, under the MIT License. That license is retained
+beside the helper at themes/clawd-scenarios/hooks/reference-texture.LICENSE.
+
+The current Clawd silhouette and face were redrawn with reference to the official
+Claude Code sticker listings, including the four-leg shape and coral #d97757:
+https://www.stickermule.com/claudecode/item/19156131
+https://www.stickermule.com/claudecode/item/19982714
+The downloaded product images are comparison references and are not bundled
+as runtime theme assets.
