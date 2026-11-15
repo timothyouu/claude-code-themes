@@ -218,3 +218,32 @@ test('self-contained gallery contains current twelve-scene appearance and motion
     assert(html.includes('id="' + control + '"'));
   }
 });
+
+test('window rain travels visibly within clipped glass instead of barely drifting', async () => {
+  const { sceneMotion } = await import(pathToFileURL(path.join(plugin, 'hooks/motion.mjs')));
+  for (const [scene, side] of [['coffee', 'left'], ['magnifier', 'left'], ['magnifier', 'right']]) {
+    const source = sceneMotion(scene, side);
+    assert(source.includes('<clipPath'), scene + ': rain must stay inside the glass');
+    assert(source.includes('data-effect="window-rain"'));
+    const falls = [...source.matchAll(/<animateTransform[^>]*to="0 ([\d.]+)"[^>]*dur="([\d.]+)s"/g)];
+    assert.equal(falls.length, 2, scene + ': separate near and far rain layers');
+    for (const [, distance, seconds] of falls) {
+      const speed = Number(distance) / Number(seconds);
+      assert(speed >= 30 && speed <= 140, scene + ': visible, restrained rainfall speed');
+    }
+  }
+});
+
+test('mascot blinks and an obvious rider translation accompany motion mode only', async () => {
+  const { buildScene } = await import(pathToFileURL(path.join(plugin, 'hooks/scene.mjs')));
+  const coffee = buildScene('coffee', 'light', true);
+  assert(coffee.includes('data-detail="mascot-blink"'));
+  assert(!buildScene('coffee', 'light', false).includes('data-detail="mascot-blink"'));
+  const skate = buildScene('skateboard', 'dark', true);
+  const rider = skate.match(/data-actor="skateboard-rider">(<animateTransform[^>]+>)/);
+  assert(rider, 'only the independent rider receives its travel transform');
+  const travel = rider[1].match(/values="([^"]+)"/)[1].split(';').map(pair => Number(pair.split(' ')[0]));
+  const seconds = Number(rider[1].match(/dur="([\d.]+)s"/)[1]);
+  assert(Math.max(...travel) - Math.min(...travel) >= 50, 'rider covers a visible local distance');
+  assert(seconds >= 6 && seconds <= 14, 'rider crosses within a short glance');
+});

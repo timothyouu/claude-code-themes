@@ -22,5 +22,8 @@ Scene concepts and character accessories were inspired by:
 https://www.stickermule.com/claudecode
 https://www.youtube.com/watch?v=tRsQsTMvPNg
 The rainy-window reference was inspected at commit
-ae7d9d6d9fb98b2409d26d405dfbc230f2be864a. Scene geometry and motion
-helpers in Clawd Scenarios were authored independently.
+ae7d9d6d9fb98b2409d26d405dfbc230f2be864a. Room geometry and localized motion
+were authored for this collection. The dotPaint, dotted, dline, and halftone
+texture helpers were subsequently adapted from rainy-window/hooks/scene.ts,
+Copyright (c) 2026 Ishu Agrawal, under the MIT License. That license is retained
+beside the helper at themes/clawd-scenarios/hooks/reference-texture.LICENSE.
