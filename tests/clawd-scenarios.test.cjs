@@ -60,7 +60,7 @@ test('startup applies scene and complete colors without overriding automatic app
   assert.equal(e.commands[0].name, 'clawd-scene');
   assert.equal(e.sets.length, 1);
   assert.equal(e.sets[0].backdrop.scene, 'clawd-scenarios-coffee-auto-motion');
-  assert.deepEqual(e.sets[0].backdrop.glass, { blur: 14, opacity: .12 });
+  assert.equal(e.sets[0].backdrop.glass, false);
   assert(e.sets[0].colors);
   assert(!Object.hasOwn(e.sets[0], 'overrideColorScheme'));
 });
@@ -88,15 +88,20 @@ test('all twelve scene switches apply colors and backdrop and persist across ses
   assert.equal(restart.sets.at(-1).backdrop.scene, 'clawd-scenarios-kite-auto-motion');
 });
 
-test('all scenes keep composer glass enabled in both appearances and automatic mode', async () => {
+test('all scenes match native footer colors and reserve composer clearance', async () => {
   const mod=await loadTheme();
-  const { paletteFor }=await import(pathToFileURL(path.join(plugin,'hooks/scene.mjs')));
+  const { paletteFor, buildScene }=await import(pathToFileURL(path.join(plugin,'hooks/scene.mjs')));
   for(const scene of expected) for(const appearance of ['light','dark','auto']){
     const look=mod.lookFor({scene,appearance,motion:true,enabled:true});
-    assert(look.backdrop.glass && look.backdrop.glass.opacity <= .2, 'composer must reveal the scene instead of forming an opaque footer');
-    assert(look.backdrop.glass.blur >= 0 && look.backdrop.glass.blur <= 20);
+    assert.equal(look.backdrop.glass, false);
+    const svg=buildScene(scene,appearance,true);
+    assert.match(svg,/composer-blend/);
+    assert.match(svg,/viewBox="-150 20 320 1000"/);
+    assert.match(svg,/viewBox="-60 20 320 1000"/);
     assert.equal(look.colors.inputs.light['gray-20'].toLowerCase(),paletteFor(scene,'light').wallmid);
     assert.equal(look.colors.inputs.dark['gray-900'].toLowerCase(),paletteFor(scene,'dark').wallmid);
+    assert.equal(look.colors.inputs.light['gray-10'].toLowerCase(),paletteFor(scene,'light').wallmid);
+    assert.equal(look.colors.inputs.dark['gray-850'].toLowerCase(),paletteFor(scene,'dark').wallmid);
     assert.equal(look.overrideColorScheme,appearance==='auto'?undefined:appearance);
   }
 });
@@ -205,8 +210,8 @@ test('continuous gradient wall stays behind protected chat furniture', async () 
     assert.match(svg, /<rect x="-340" width="680" height="100%" fill="black" opacity=".80"/);
     assert.match(svg, /<svg x="0" y="0" width="38%"/);
     assert.match(svg, /<svg x="62%" y="0" width="38%"/);
-    assert.match(svg, /viewBox="0 20 320 760"/);
-    assert.match(svg, /viewBox="-60 20 320 760"/);
+    assert.match(svg, /viewBox="-150 20 320 1000"/);
+    assert.match(svg, /viewBox="-60 20 320 1000"/);
     // Bound every possible continuous-lighting color, then allow 20% extreme
     // artwork through the mask. Peaks are conservatively allowed to coincide.
     const walls = ['walltop','wallmid','wallbottom'].map(role => channels(palette[role]));

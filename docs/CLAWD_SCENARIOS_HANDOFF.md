@@ -60,6 +60,10 @@ An older inline Golden Gate build also loads in the existing session. Its `/gold
 
 ## Composer continuity correction
 
-The opaque footer in the user's screenshot came from `glass: false`, which left Claude's composer panel opaque, combined with panel colors based on the earlier olive scene background. The fix enables the supported native glass treatment with 14px blur and 12% opacity and anchors native panels to the cream/navy wall midpoint. It applies to all twelve scenes in light, dark, and automatic modes. The artwork and motion are unchanged.
+The screenshot exposed an olive native footer against a navy scene. Native surface 0 and surface 1 now match the scene wall midpoint in light and dark mode. Glass remains disabled: native tests with glass enabled hid the artwork, including a test with the noninteractive SVG image path. No OS settings changed.
 
-Twenty tests and strict native SDK TypeScript pass, including a regression that requires a translucent composer and panel colors matching the wall in every mode. Native expanded-composer verification is pending while another Claude session uses the desktop. No OS transparency setting was changed.
+The shared renderer reserves 240 vertical art units beneath furniture (1000-unit viewBox), shifts the left composition into view beside the sidebar, and blends the final 280 pixels to the native footer color. Motion and the protected transcript lane remain enabled. The SDK exposes no composer height; this is a conservative clearance, not dynamic tracking of arbitrarily tall composers.
+
+Verified in the maximized 1707 x 1019 Claude window with the sidebar open: coffee in light and dark mode, each with an eight-line unsent draft. The complete mascot remained above the composer, messages were readable, and rain/steam remained visible. Local screenshots are in the Windows workspace under claude-scenarios/composer-proof; private chat captures are not published. Restored coffee auto motion and the original unsent draft.
+
+Twenty tests, strict native SDK TypeScript, artwork validation, and native plugin validation pass. Automated coverage checks all twelve scenes and light/dark/automatic modes; this fix did not repeat native visual checks of every scene. Previous scene captures predate this layout change.
