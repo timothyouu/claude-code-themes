@@ -8,7 +8,7 @@ The latest artwork is freckled-v5. The user asked for the original rainy-window 
 
 The light wall uses the original reference's top, middle, and bottom cream colors: `#f2ece2`, `#efe7db`, and `#eedfca`. Cool upper-right light, rose upper-left light, warm floor light, and subtle edge shading cover the whole canvas. Dark mode uses a navy/plum equivalent. There are no wallpaper dots.
 
-Furniture occupies the two 35% side viewports. An 800-unit scene height gives it more screen coverage while retaining the fine object texture. Only artwork beneath the centered 680px transcript lane is masked to 20% opacity. The background remains continuous through the lane, without a flat veil stripe.
+Furniture occupies the two 38% side viewports. An 800-unit scene height gives it more screen coverage while retaining the fine object texture. Only artwork beneath the centered 680px transcript lane is masked to 20% opacity. The background remains continuous through the lane, without a flat veil stripe.
 
 The texture helper adapts `dotPaint`, `dotted`, `dline`, and `halftone` from the actual rainy-window source in `ishuagrawal/claude-code-themes`, commit `ae7d9d6d9fb98b2409d26d405dfbc230f2be864a`. It retains the five-density relationships and scales the original 6px pitch and radii by 0.45, producing a finer 2.7px object pattern. The original radii were 2.6, 2.1, 1.6, 1.15, and 0.75; current pixels are scaled adaptations, not an exact-size copy. MIT attribution remains in `hooks/reference-texture.LICENSE` and the repository notice.
 
@@ -26,7 +26,7 @@ The repository also has a marketplace entry, a self-contained preview gallery, P
 - Strict TypeScript passed against the installed native Claude SDK with `strict`, `noImplicitAny`, and `noUncheckedIndexedAccess`.
 - The contrast regression bounds continuous background lighting and 20% artwork contribution inside the protected 680px lane. Current primary and muted text contrast is at least 4.68:1. This is not a full-window contrast claim.
 - The independent verifier passed all 72 current freckled-v5 scene/appearance/motion outputs, including finer texture, smaller layout, continuous lighting, and the artwork-only mask.
-- The largest current SVG is 75,898 characters, below the native 131,072-character limit. All 21 imported modules are below the native 1 MiB per-file limit.
+- The largest current SVG is 75,900 characters, below the native 131,072-character limit. All 21 imported modules are below the native 1 MiB per-file limit.
 - Plugin validation passed, with only the optional marketplace icon advisory.
 - Gallery controls previously passed desktop and mobile browser checks. Their control code is unchanged; the parity test checks that embedded SVGs match the current renderer.
 - The UI detector previously reported only the cream-palette warning after text contrast and mobile font fixes. The warm paper palette follows the reference. This control-layout evidence does not replace current native artwork checks.
@@ -58,3 +58,5 @@ The GitHub branch and PR are intended for review before merging. No merge is par
 An older inline Golden Gate build also loads in the existing session. Its `/golden-gate off` returned help instead of disabling that older mod. Reapplying `/clawd-scene coffee` restored Clawd successfully. A new-session ordering conflict was not reproduced, and the older inline mod was not edited or removed.
 
 The latest layout widens each side viewport from 25% to 35% and uses an 800-unit scene height so the artwork occupies more of the screen. The centered 680px chat mask and fine object texture remain unchanged. Reloaded and visually checked the expanded Coffee layout in Claude Desktop; the linked motion GIF predates this layout-only change. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
+
+The current layout uses 38% side viewports and a 760-unit scene height, bringing the scenery slightly farther inward. Tested the installed Coffee scene in a maximized 1707 x 1019 Claude Desktop window, in both dark automatic and light modes. Chat remains readable; rain and steam remain active. Claude was left maximized. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.

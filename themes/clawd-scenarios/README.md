@@ -66,7 +66,7 @@ node scripts/generate-clawd-previews.mjs
 node scripts/verify-clawd-art.mjs
 ```
 
-The current renderer passed 18 tests, strict TypeScript against the installed Claude SDK, and independent verification of all 72 scene/appearance/motion outputs. The largest SVG is 75,898 characters, below the native 131,072-character limit. All 21 imported modules are below 1 MiB. Tested text contrast inside the protected lane is at least 4.68:1.
+The current renderer passed 18 tests, strict TypeScript against the installed Claude SDK, and independent verification of all 72 scene/appearance/motion outputs. The largest SVG is 75,900 characters, below the native 131,072-character limit. All 21 imported modules are below 1 MiB. Tested text contrast inside the protected lane is at least 4.68:1.
 
 Generating optional PNG previews requires an existing Sharp installation. Neither script installs packages:
 
@@ -75,3 +75,5 @@ node scripts/export-clawd-images.mjs --sharp=/absolute/path/to/sharp
 ```
 
 The latest layout widens each side viewport from 25% to 35% and uses an 800-unit scene height so the artwork occupies more of the screen. The centered 680px chat mask and fine object texture remain unchanged. Reloaded and visually checked the expanded Coffee layout in Claude Desktop; the linked motion GIF predates this layout-only change. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
+
+The current layout uses 38% side viewports and a 760-unit scene height, bringing the scenery slightly farther inward. Tested the installed Coffee scene in a maximized 1707 x 1019 Claude Desktop window, in both dark automatic and light modes. Chat remains readable; rain and steam remain active. Claude was left maximized. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
