@@ -20,6 +20,8 @@ Use `/clawd-scene` with any of:
 
 Choices can be combined: `/clawd-scene kite dark still`. Selecting a scene or appearance turns the theme on. `off` clears this plugin's theme; `on` restores its saved scene, appearance, and motion. Choices persist across sessions. Invalid commands leave saved choices unchanged.
 
+Keep one backdrop theme active at a time. If another mod replaces the background during session startup, `/clawd-scene coffee` reapplies this collection. Older inline theme builds may not support the same off command as their current marketplace version.
+
 `auto` follows Claude's own appearance through SVG `light-dark()` colors, without media-query styles that can freeze desktop SVG motion. Both theme colors and backdrop are reapplied when a choice changes.
 
 ## Preview and export

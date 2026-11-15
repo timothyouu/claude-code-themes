@@ -33,3 +33,5 @@ Two bounded scene writers delivered six scenes each. A plugin worker handled reg
 ## Remaining decisions
 
 The GitHub branch and PR are intended for review before merging. No merge is part of this handoff. Use the local installed theme immediately; a marketplace install from the default branch will include this option after the PR is merged. Scenes should be rechecked if Claude's early-access mod API changes.
+
+The existing session also loads an older inline Golden Gate build. Its `/golden-gate off` returned help instead of disabling that older mod. Clawd Coffee was reapplied successfully afterward. A new-session ordering conflict was not reproduced, so the documentation explains how to reapply Clawd if another backdrop replaces it. The older inline mod was not edited or removed.
