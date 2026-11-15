@@ -16,3 +16,11 @@ https://code.claude.com/docs/en/plugins/mods/interface
 
 Claude and Claude Code are products of Anthropic. This is an independent
 community theme, not an official Anthropic product.
+
+Clawd Scenarios
+Scene concepts and character accessories were inspired by:
+https://www.stickermule.com/claudecode
+https://www.youtube.com/watch?v=tRsQsTMvPNg
+The rainy-window reference was inspected at commit
+ae7d9d6d9fb98b2409d26d405dfbc230f2be864a. Scene geometry and motion
+helpers in Clawd Scenarios were authored independently.
