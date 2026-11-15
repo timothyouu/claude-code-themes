@@ -1,0 +1,18 @@
+Golden Gate Dither
+Copyright 2026 Timothy Ou
+
+The repository structure and installation guide were inspired by:
+https://github.com/ishuagrawal/claude-code-themes
+No rainy-window scene artwork or source was copied into this theme.
+
+hooks/make-colors.js and hooks/make-colors.d.ts are the unchanged generated
+theme helper supplied by Claude Code's mod authoring tooling. Their generated
+headers and hashes are retained. The JavaScript helper identifies:
+sources-sha256: c44e83e0e09808d3442f475a8b2ff715181338f4973f7b860009f0fe4b4093a8
+body-sha256: 9d71ea3fbc24f3fef16ac58e386315002d2e4763c27138821dcd756d38510d65
+
+Claude Code mod authoring and backdrop documentation:
+https://code.claude.com/docs/en/plugins/mods/interface
+
+Claude and Claude Code are products of Anthropic. This is an independent
+community theme, not an official Anthropic product.

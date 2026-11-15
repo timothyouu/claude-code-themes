@@ -1,0 +1,12 @@
+{
+  "name": "golden-gate-claude-themes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "preview": "node scripts/generate-previews.cjs"
+  },
+  "engines": { "node": ">=22.14.0" },
+  "license": "Apache-2.0"
+}

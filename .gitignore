@@ -1,0 +1,9 @@
+node_modules/
+**/.claude-plugin/types/
+**/.claude-plugin/cache/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.log
+coverage/

@@ -1,0 +1,19 @@
+{
+  "name": "claude-code-themes",
+  "owner": {
+    "name": "Timothy Ou",
+    "url": "https://github.com/timothyouu"
+  },
+  "metadata": {
+    "description": "Animated backgrounds for the Code tab of Claude Desktop"
+  },
+  "plugins": [
+    {
+      "name": "golden-gate-dither",
+      "source": "./themes/golden-gate-dither",
+      "description": "A dithered Golden Gate Bridge with gentle motion and automatic light and dark appearance",
+      "version": "1.0.0",
+      "category": "theme"
+    }
+  ]
+}

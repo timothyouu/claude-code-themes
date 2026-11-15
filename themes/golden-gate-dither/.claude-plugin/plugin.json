@@ -1,0 +1,11 @@
+{
+  "name": "golden-gate-dither",
+  "version": "1.0.0",
+  "description": "A slowly drifting, dithered Golden Gate Bridge backdrop with clouds and a quiet session readout.",
+  "types": "./types/index.d.ts",
+  "author": { "name": "Timothy Ou", "url": "https://github.com/timothyouu" },
+  "homepage": "https://github.com/timothyouu/claude-code-themes",
+  "repository": "https://github.com/timothyouu/claude-code-themes",
+  "license": "Apache-2.0",
+  "keywords": ["claude-code", "theme", "golden-gate", "dither", "animated-background"]
+}
