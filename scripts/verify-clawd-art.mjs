@@ -395,10 +395,10 @@ def check_scene(document, root):
     art_groups = [element for element in root if element.get('mask') == 'url(#chat-protection)']
     assert len(art_groups) == 1 and name(art_groups[0]) == 'g', label + ': protection mask must wrap only the art group'
     margins = list(art_groups[0])
-    assert len(margins) == 2 and all(name(element) == 'svg' and element.get('width') == '25%' for element in margins) and sorted(element.get('x') for element in margins) == ['0','75%'], label + ': art margins must leave the central 50% empty'
+    assert len(margins) == 2 and all(name(element) == 'svg' and element.get('width') == '35%' for element in margins) and sorted(element.get('x') for element in margins) == ['0','65%'], label + ': art margins must leave the central 30% empty'
     for margin in margins:
         side = 'left' if margin.get('x') == '0' else 'right'
-        expected_box = '0 -200 320 1000' if side == 'left' else '-60 -200 320 1000'
+        expected_box = '0 0 320 800' if side == 'left' else '-60 0 320 800'
         assert margin.get('overflow') == 'hidden' and margin.get('viewBox') == expected_box, label + ': complete rooms must render at the selected smaller scale'
         validate_art({'label':label,'kind':'scene','paint_values':paints},margin,patterns)
         authored = [element for element in margin if element.get('data-dither')]

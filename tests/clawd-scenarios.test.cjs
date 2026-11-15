@@ -190,8 +190,10 @@ test('continuous gradient wall stays behind protected chat furniture', async () 
     for (const layer of ['wall','cool','rose','floor','corner']) assert(svg.includes(`width="100%" height="100%" fill="url(#room-${layer})"`));
     assert.match(svg, /<g mask="url\(#chat-protection\)"><svg x="0"/);
     assert.match(svg, /<rect x="-340" width="680" height="100%" fill="black" opacity=".80"/);
-    assert.match(svg, /viewBox="0 -200 320 1000"/);
-    assert.match(svg, /viewBox="-60 -200 320 1000"/);
+    assert.match(svg, /<svg x="0" y="0" width="35%"/);
+    assert.match(svg, /<svg x="65%" y="0" width="35%"/);
+    assert.match(svg, /viewBox="0 0 320 800"/);
+    assert.match(svg, /viewBox="-60 0 320 800"/);
     // Bound every possible continuous-lighting color, then allow 20% extreme
     // artwork through the mask. Peaks are conservatively allowed to coincide.
     const walls = ['walltop','wallmid','wallbottom'].map(role => channels(palette[role]));
