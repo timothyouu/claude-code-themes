@@ -27,13 +27,13 @@ Open a new Code session, send its first message, then choose a scene:
 
 ```text
 /clawd-scene coffee
-/clawd-scene headphones dark
-/clawd-scene book light still
+/clawd-dark headphones
+/clawd-light book still
 ```
 
 ![Clawd's rainy café in light appearance](assets/clawd-scenarios/coffee-light.png)
 
-The furniture uses colored washes and round halftone detail inspired by the reference theme. Rain, steam, records, bubbles, clouds, and other small details animate locally. The skatepark has one moving rider and two stationary spectators.
+Every scene has explicit light and dark choices. Clawd uses a solid coral four-leg silhouette and black square eyes drawn from the official sticker reference; the furniture retains fine halftone detail. Rain, steam, records, bubbles, clouds, and other small details animate locally. The skatepark has one moving rider and two stationary spectators.
 
 | Character | Scenario |
 | --- | --- |

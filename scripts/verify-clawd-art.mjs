@@ -33,6 +33,7 @@ if (!fs.existsSync(generatedFile)) {
 }
 const { DITHERED_SCENES } = await import(pathToFileURL(generatedFile));
 const { PITCH, RADII, createReferenceTexture } = await import(pathToFileURL(path.join(hooks, 'reference-texture.mjs')));
+const { clawd } = await import(pathToFileURL(path.join(hooks, 'primitives.mjs')));
 const { sceneMotion } = await import(pathToFileURL(path.join(hooks, 'motion.mjs')));
 const { SCENARIOS, buildScene, paletteFor } = await import(pathToFileURL(path.join(hooks, 'scene.mjs')));
 assert.deepEqual(Object.keys(DITHERED_SCENES).sort(), [...expected].sort(), 'Generated art must contain all twelve scenarios');
@@ -106,6 +107,10 @@ const convertedPaint = recipe.dotted(2, '<path fill="var(--cool)" stroke="var(--
 assert(!convertedPaint.includes('var(--'), 'Dotted helper must convert both fill and stroke');
 
 const documents = [];
+for (const variant of ['plain', 'coffee']) {
+  const fixture = clawd(0, 0, variant, 1).replaceAll('fill="#d77c5c"', 'data-mascot="body" fill="#d77c5c"').replaceAll('fill="#211d19"', 'data-mascot="eyes" fill="#211d19"');
+  documents.push({ label: `source-mascot/${variant}`, kind: 'mascot-fixture', variant, svg: `<svg xmlns="http://www.w3.org/2000/svg">${fixture}</svg>` });
+}
 const distinct = new Set();
 let longestSvg = 0;
 for (const key of expected) {
@@ -212,6 +217,108 @@ def canonical(element, paints):
         return re.sub(r'var\(--([a-z]+)\)', lambda match: paints[match.group(1)], value)
     return [(name(element), tuple(sorted((key, resolve(value)) for key, value in element.attrib.items())), (element.text or '').strip(), tuple(children))]
 
+def orthogonal_polygons(element, label):
+    data = element.get('d','')
+    assert re.fullmatch(r'[MmLlHhVvZz0-9.,+\-\s]+',data), label + ': mascot needs clean orthogonal steps'
+    tokens = re.findall(r'[MmLlHhVvZz]|[-+]?(?:\d*\.\d+|\d+)',data)
+    polygons, polygon = [], []
+    cursor = start = (0.,0.)
+    index = 0
+    command = None
+    while index < len(tokens):
+        if tokens[index].isalpha():
+            command = tokens[index]; index += 1
+        assert command is not None, label + ': malformed mascot path'
+        if command.lower() == 'z':
+            if polygon[-1] != start:
+                polygon.append(start)
+            polygons.append(polygon)
+            polygon = []
+            cursor = start
+            command = None
+            continue
+        relative = command.islower()
+        kind = command.lower()
+        x,y = cursor
+        if kind in ('m','l'):
+            target = (float(tokens[index]),float(tokens[index+1])); index += 2
+            cursor = (x+target[0],y+target[1]) if relative else target
+            if kind == 'm':
+                assert not polygon, label + ': mascot subpath must close'
+                start = cursor
+                command = 'l' if relative else 'L'
+        elif kind == 'h':
+            value = float(tokens[index]); index += 1
+            cursor = (x+value if relative else value,y)
+        elif kind == 'v':
+            value = float(tokens[index]); index += 1
+            cursor = (x,y+value if relative else value)
+        if polygon:
+            assert cursor[0] == polygon[-1][0] or cursor[1] == polygon[-1][1], label + ': mascot silhouette may not have diagonal edges'
+        polygon.append(cursor)
+    assert not polygon and polygons, label + ': mascot path must close'
+    return polygons
+
+def path_bounds(polygons):
+    points = [point for polygon in polygons for point in polygon]
+    return min(p[0] for p in points), min(p[1] for p in points), max(p[0] for p in points), max(p[1] for p in points)
+
+def row_intervals(polygons, row):
+    crossings = []
+    for polygon in polygons:
+        for (x1,y1),(x2,y2) in zip(polygon,polygon[1:]):
+            if (y1 <= row < y2) or (y2 <= row < y1):
+                crossings.append(x1 + (row-y1)*(x2-x1)/(y2-y1))
+    crossings.sort()
+    assert len(crossings)%2 == 0, 'Invalid mascot row intersections'
+    return list(zip(crossings[::2],crossings[1::2]))
+
+def validate_body(element, label, variant='plain'):
+    polygons = orthogonal_polygons(element,label)
+    assert len(polygons) == 1, label + ': body must be one connected silhouette'
+    left,top,right,bottom = path_bounds(polygons)
+    width,height = right-left,bottom-top
+    assert math.isclose(width/height,88/64), label + ': body must retain squat sticker proportions'
+    def normalized(row):
+        return [((a-left)/width,(b-left)/width) for a,b in row_intervals(polygons,top+row*height)]
+    def matches(actual, expected):
+        return len(actual) == len(expected) and all(math.isclose(a,c) and math.isclose(b,d) for (a,b),(c,d) in zip(actual,expected))
+    torso = [(8/88,80/88)]
+    assert matches(normalized(.125),torso) and matches(normalized(.375),[(0,1)]) and matches(normalized(.625),torso), label + ': crown, short side arms and torso must retain clean stepped proportions'
+    feet = [(16/88,24/88),(32/88,40/88),(48/88,56/88),(64/88,72/88)] if variant == 'coffee' else [(8/88,16/88),(24/88,32/88),(56/88,64/88),(72/88,80/88)]
+    assert matches(normalized(.89),feet) and matches(normalized(.99),feet), label + ': mascot needs four equal-width, flat-bottom feet in its sticker arrangement'
+
+def validate_eyes(element, label, variant='plain'):
+    polygons = orthogonal_polygons(element,label)
+    assert len(polygons) == 2, label + ': mascot needs exactly two eyes'
+    bounds = sorted(path_bounds([polygon]) for polygon in polygons)
+    for left,top,right,bottom in bounds:
+        assert math.isclose(right-left,bottom-top) and right-left > 0, label + ': eyes must be square'
+    centers = [((a+c)/2,(b+d)/2,c-a) for a,b,c,d in bounds]
+    expected = [(24,25,8),(64,25,8)] if variant == 'coffee' else [(20,33,8),(68,33,8)]
+    scale = centers[0][2]/8
+    assert all(all(math.isclose(actual,wanted*scale) for actual,wanted in zip(center,target)) for center,target in zip(centers,expected)), label + ': eyes must match the two-square sticker expression'
+
+def validate_crossed_eyes(element, label):
+    data = element.get('d','')
+    assert re.fullmatch(r'[MmLl0-9.,+\-\s]+',data), label + ': dizzy expression must use diagonal line strokes only'
+    tokens = re.findall(r'[MmLl]|[-+]?(?:\d*\.\d+|\d+)',data)
+    index, command, cursor, segments = 0, None, (0.,0.), []
+    while index < len(tokens):
+        if tokens[index].isalpha():
+            command = tokens[index]; index += 1
+        x,y = float(tokens[index]),float(tokens[index+1]); index += 2
+        target = (cursor[0]+x,cursor[1]+y) if command.islower() else (x,y)
+        if command.lower() == 'l':
+            segments.append(tuple(sorted((cursor,target))))
+        cursor = target
+        if command.lower() == 'm':
+            command = 'l' if command.islower() else 'L'
+    expected = []
+    for left in (16.,64.):
+        expected += [((left,29.),(left+8,37.)),((left,37.),(left+8,29.))]
+    assert sorted(segments) == sorted(expected), label + ': dizzy eyes must form two 8px crosses at the square-eye positions'
+
 def validate_art(document, root, global_patterns=None):
     global glass_windows
     label = document['label']
@@ -222,18 +329,16 @@ def validate_art(document, root, global_patterns=None):
     paints = document.get('paint_values', {role: 'var(--' + role + ')' for role in ART_ROLES})
     for pattern in local_patterns.values():
         role = pattern.get('data-paint')
-        assert role in ART_ROLES | {'mascot'}, label + ': density pattern needs known semantic or mascot paint'
+        assert role in ART_ROLES, label + ': density pattern needs known semantic or mascot paint'
         assert math.isclose(float(pattern.get('width')),TEXTURE_PITCH) and math.isclose(float(pattern.get('height')),TEXTURE_PITCH) and pattern.get('patternUnits') == 'userSpaceOnUse', label + ': rendered freckle pitch must be .45 of upstream'
         assert len(pattern) == 1 and name(pattern[0]) == 'circle', label + ': real reference patterns contain one dot only, with no wash rectangle'
         density = int(pattern.get('data-density', '-1'))
         assert 0 <= density < 5 and pattern.get('data-texture') == 'density-' + str(density), label + ': missing exact reference density metadata'
         dot = pattern[0]
         assert math.isclose(float(dot.get('cx')),TEXTURE_PITCH/2) and math.isclose(float(dot.get('cy')),TEXTURE_PITCH/2) and math.isclose(float(dot.get('r','0')),RADII[density]*TEXTURE_SCALE,abs_tol=.00005), label + ': rendered dot must retain the upstream radius/spacing ratio'
-        expected = '#d77c5c' if role == 'mascot' else paints[role]
+        expected = paints[role]
         assert dot.get('fill') == expected, label + ': freckle paint must match its role'
         assert dot.get('opacity', '1') == '1', label + ': native reference density dots must be solid'
-        if role == 'mascot':
-            assert pattern.get('data-color') == '#d77c5c' and density == 0, label + ': Clawd must use full terracotta freckles'
     clears = [element for element in root.iter() if element.get('data-texture') == 'glass-clear']
     bands = [element for element in root.iter() if element.get('data-texture') == 'glass-band']
     assert len(bands) == len(clears) * 3, label + ': every graduated glass rectangle needs three reference density bands'
@@ -272,7 +377,7 @@ def validate_art(document, root, global_patterns=None):
                     if role in ART_ROLES:
                         used_art_roles.add(role)
             else:
-                assert paint in set(paints.values()) | {'#d77c5c', '#211d19'}, label + ': unknown art paint ' + paint
+                assert paint in set(paints.values()) | {'#d97757', '#000000', '#d77c5c', '#211d19'}, label + ': unknown art paint ' + paint
         if tag in ('path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon') and not in_defs:
             visible.append(element)
             stroke = element.get('stroke', 'none')
@@ -282,7 +387,7 @@ def validate_art(document, root, global_patterns=None):
                 elif stroke == '#211d19':
                     # The dizzy mascot's two crossed eyes are facial marks,
                     # not continuous furniture outlines.
-                    assert element.get('d') == 'M23 27l10 10m0-10L23 37m29-10 10 10m0-10L52 37', label + ': unexpected solid facial accent'
+                    validate_crossed_eyes(element,label)
                 elif document['kind'] in ('art', 'actor'):
                     assert element.get('data-texture') == 'dline' and element.get('stroke-dasharray') == '0 2.7' and element.get('stroke-linecap') == 'round' and element.get('stroke-linejoin') == 'round', label + ': authored strokes must use the upstream dotted-line recipe, not continuous outlines'
                     printed_edges.append(element)
@@ -295,11 +400,11 @@ def validate_art(document, root, global_patterns=None):
         if element.get('data-mascot'):
             assert re.fullmatch(r'[MmLlHhVvZz0-9.,+\-\s]+', element.get('d', '')), label + ': mascot pixel silhouette was altered'
             if element.get('data-mascot') == 'body':
-                paint = element.get('fill', '')
-                reference = re.fullmatch(r'url\(#([a-zA-Z0-9_-]+)\)', paint)
-                assert reference and patterns[reference.group(1)].get('data-paint') == 'mascot', label + ': body must retain terracotta density-zero freckles'
+                assert element.get('fill') == '#d97757' and element.get('data-texture') == 'mascot-solid', label + ': body must use sampled solid coral, with no texture pattern'
+                validate_body(element, label)
             else:
-                assert element.get('data-mascot') == 'eyes' and element.get('fill') == '#211d19', label + ': eyes must stay solid and readable'
+                assert element.get('data-mascot') == 'eyes' and element.get('fill') == '#000000', label + ': eyes must stay solid black'
+                validate_eyes(element, label)
         for child in element:
             walk(child, in_defs)
     walk(root)
@@ -428,7 +533,12 @@ def check_scene(document, root):
 
 for document in json.load(sys.stdin):
     root = ET.fromstring(document['svg'])
-    if document['kind'] in ('art','actor'):
+    if document['kind'] == 'mascot-fixture':
+        body = next(element for element in root.iter() if element.get('data-mascot') == 'body')
+        eyes = next(element for element in root.iter() if element.get('data-mascot') == 'eyes')
+        validate_body(body,document['label'],document['variant'])
+        validate_eyes(eyes,document['label'],document['variant'])
+    elif document['kind'] in ('art','actor'):
         art_sources[document['label']] = root
         validate_art(document,root)
     else:

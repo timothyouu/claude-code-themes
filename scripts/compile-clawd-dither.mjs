@@ -62,12 +62,12 @@ function compileLayer(source,prefix) {
     .replaceAll('fill="#211d19"','data-mascot="eyes" fill="#211d19"');
   markup=markup.replace(/<(path|rect|circle|ellipse|polygon|polyline|line)\b([^>]*?)\/>/g,(_tag,name,attributes)=>{
     let attrs=attributes;
-    // Keep Clawd's pixel silhouette, printing the body in full terracotta dots.
-    // His tiny square eyes stay solid so the expression remains legible.
+    // Clawd follows the sticker: a clean coral silhouette and solid black eyes.
+    // Fine halftone printing belongs to the surrounding furnishings.
     if(attr(attrs,'data-mascot')==='body') {
-      attrs=put(attrs,'fill',texture.dotPaint(0,'#d77c5c'));
-      return shape(name,put(attrs,'data-texture','mascot-freckles'));
+      return shape(name,put(put(attrs,'fill','#d97757'),'data-texture','mascot-solid'));
     }
+    if(attr(attrs,'data-mascot')==='eyes') return shape(name,put(attrs,'fill','#000000'));
     if(attr(attrs,'data-mascot')) return shape(name,attrs);
     const fill=attr(attrs,'fill');
     const stroke=attr(attrs,'stroke');

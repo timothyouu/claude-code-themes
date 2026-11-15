@@ -85,25 +85,11 @@ async function apply($: EngineInterface, p: Preferences): Promise<string> {
   return result.isDrawn ? 'drawn' : `not drawn: ${result.reason}`
 }
 
-const HELP = `Use /clawd-scene ${KEYS.join(' | ')}; auto | light | dark; on | off; still | motion; status. Combine choices, for example /clawd-scene kite dark still.`
+const HELP = `Use /clawd-scene ${KEYS.join(' | ')}; auto | light | dark; on | off; still | motion; status. Combine choices, for example /clawd-scene kite dark still. Shortcuts: /clawd-light [scene] and /clawd-dark [scene].`
 
-export const register: Register = on => {
-  on('session.start', async ($, e, next) => {
-    await $.command.register({
-      name: 'clawd-scene',
-      description: 'Choose a Clawd scene, appearance, and motion',
-      argumentHint: '<scene> [auto|light|dark] [on|off] [still|motion]',
-    })
-    const p = await preferences($)
-    if (p.enabled) {
-      const status = await apply($, p)
-      if (status !== 'drawn' && e.surface !== 'terminal') $.ui.toast(`Clawd scenarios: ${status}`)
-    }
-    return next(e)
-  })
-
-  on('command.run', { command: 'clawd-scene' }, async ($, e) => {
-    const tokens = e.args.trim().toLowerCase().split(/\s+/).filter(Boolean)
+/** Shared selection logic keeps appearance shortcuts and scene commands consistent. */
+async function runSceneCommand($: EngineInterface, args: string): Promise<{ text: string }> {
+    const tokens = args.trim().toLowerCase().split(/\s+/).filter(Boolean)
     const current = await preferences($)
     if (tokens.length === 0 || (tokens.length === 1 && tokens[0] === 'help')) return { text: HELP }
     if (tokens.length === 1 && tokens[0] === 'status') {
@@ -120,7 +106,37 @@ export const register: Register = on => {
     await $.store.set(STORE_KEY, next)
     const status = await apply($, next)
     return { text: `Clawd: ${SCENARIOS[next.scene].title}, ${next.appearance}, ${next.motion ? 'motion' : 'still'} (${status}).` }
+}
+
+async function appearanceShortcut($: EngineInterface, args: string, appearance: 'light' | 'dark'): Promise<{ text: string }> {
+  const tokens = args.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (tokens.some(token => !isScene(token) && token !== 'still' && token !== 'motion')) {
+    return { text: `Use /clawd-${appearance} [scene] [still|motion]. Omit the scene to keep your current room.` }
+  }
+  return runSceneCommand($, [...tokens, appearance].join(' '))
+}
+
+export const register: Register = on => {
+  on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'clawd-scene',
+      description: 'Choose a Clawd scene, appearance, and motion',
+      argumentHint: '<scene> [auto|light|dark] [on|off] [still|motion]',
+    })
+    await $.command.register({ name: 'clawd-light', description: 'Light mode for any Clawd scene', argumentHint: '[scene] [still|motion]' })
+    await $.command.register({ name: 'clawd-dark', description: 'Dark mode for any Clawd scene', argumentHint: '[scene] [still|motion]' })
+    const p = await preferences($)
+    if (p.enabled) {
+      const status = await apply($, p)
+      if (status !== 'drawn' && e.surface !== 'terminal') $.ui.toast(`Clawd scenarios: ${status}`)
+    }
+    return next(e)
   })
+
+  on('command.run', { command: 'clawd-scene' }, ($, e) => runSceneCommand($, e.args))
+
+  on('command.run', { command: 'clawd-light' }, ($, e) => appearanceShortcut($, e.args, 'light'))
+  on('command.run', { command: 'clawd-dark' }, ($, e) => appearanceShortcut($, e.args, 'dark'))
 
   on('ui.render', { component: 'Backdrop' }, async ($, e, next) => {
     if (e.props.plugin !== $.plugin.name) return next(e)

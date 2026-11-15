@@ -250,3 +250,30 @@ test('mascot blinks and an obvious rider translation accompany motion mode only'
   assert(Math.max(...travel) - Math.min(...travel) >= 50, 'rider covers a visible local distance');
   assert(seconds >= 6 && seconds <= 14, 'rider crosses within a short glance');
 });
+
+
+test('dedicated light and dark commands work for every scene and preserve motion', async () => {
+  const mod=await loadTheme();
+  const e=engine();
+  const h=hooks(mod.register);
+  await start(h,e);
+  assert.deepEqual(e.commands.map(value=>value.name),['clawd-scene','clawd-light','clawd-dark']);
+  for(const mode of ['light','dark']) for(const scene of expected){
+    await h.get('command.run:clawd-'+mode)(e.$,{args:scene+' still'});
+    assert.equal(e.sets.at(-1).overrideColorScheme,mode);
+    assert.equal(e.sets.at(-1).backdrop.scene,`clawd-scenarios-${scene}-${mode}-still`);
+    assert.deepEqual(e.store.get('preferences'),{scene,appearance:mode,motion:false,enabled:true});
+  }
+  await h.get('command.run:clawd-light')(e.$,{args:''});
+  assert.equal(e.store.get('preferences').scene,'kite');
+  assert.equal(e.store.get('preferences').motion,false);
+  const previous=structuredClone(e.store.get('preferences'));
+  const count=e.sets.length;
+  const invalid=await h.get('command.run:clawd-dark')(e.$,{args:'coffee wrong'});
+  assert.match(invalid.text,/Use \/clawd-dark/);
+  assert.deepEqual(e.store.get('preferences'),previous);
+  assert.equal(e.sets.length,count);
+  const restart=engine(e.store);
+  await start(hooks(mod.register),restart);
+  assert.equal(restart.sets[0].backdrop.scene,'clawd-scenarios-kite-light-still');
+});

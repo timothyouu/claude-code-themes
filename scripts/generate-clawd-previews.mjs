@@ -83,7 +83,7 @@ function render() {
   get('conversation').hidden = !state.chat;
   get('scene-select').value = state.scene;
   for (const button of get('scene-list').children) button.setAttribute('aria-pressed', String(button.dataset.scene === state.scene));
-  get('command').textContent = '/clawd-scene ' + state.scene + ' ' + state.appearance + ' ' + (state.motion ? 'motion' : 'still');
+  get('command').textContent = '/clawd-' + state.appearance + ' ' + state.scene + ' ' + (state.motion ? 'motion' : 'still');
 }
 for (const mode of ['light','dark']) get(mode).addEventListener('click', () => { state.appearance = mode; render(); });
 get('motion').addEventListener('click', () => { state.motion = !state.motion; render(); });

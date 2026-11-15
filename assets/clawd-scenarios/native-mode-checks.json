@@ -1,0 +1,207 @@
+{
+  "nativeWindow": "maximized 1707x1019",
+  "sceneCount": 12,
+  "appearances": [
+    "light",
+    "dark"
+  ],
+  "captureCount": 24,
+  "characterReference": "https://www.stickermule.com/claudecode/item/19156131",
+  "bodyColor": "#d97757",
+  "fourLegs": true,
+  "method": "Used the explicit light and dark commands in Claude Desktop, captured all 24 results, reviewed framing/accessories/chat, checked dimensions, palette brightness and solid-coral pixels. Cropped artwork exports exclude the private transcript. The separate earlier motion-pair report remains historical evidence for unchanged environmental motion.",
+  "results": [
+    {
+      "scene": "coffee",
+      "mode": "light",
+      "command": "/clawd-light coffee motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5530,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "heart",
+      "mode": "light",
+      "command": "/clawd-light heart motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5347,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "headphones",
+      "mode": "light",
+      "command": "/clawd-light headphones motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5622,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "skateboard",
+      "mode": "light",
+      "command": "/clawd-light skateboard motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 4755,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "wand",
+      "mode": "light",
+      "command": "/clawd-light wand motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5887,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "lightbulb",
+      "mode": "light",
+      "command": "/clawd-light lightbulb motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 4925,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "magnifier",
+      "mode": "light",
+      "command": "/clawd-light magnifier motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 8646,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "dizzy",
+      "mode": "light",
+      "command": "/clawd-light dizzy motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 8733,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "book",
+      "mode": "light",
+      "command": "/clawd-light book motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 6710,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "bubble",
+      "mode": "light",
+      "command": "/clawd-light bubble motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9304,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "cape",
+      "mode": "light",
+      "command": "/clawd-light cape motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9812,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "kite",
+      "mode": "light",
+      "command": "/clawd-light kite motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9458,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "coffee",
+      "mode": "dark",
+      "command": "/clawd-dark coffee motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5394,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "heart",
+      "mode": "dark",
+      "command": "/clawd-dark heart motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5287,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "headphones",
+      "mode": "dark",
+      "command": "/clawd-dark headphones motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5534,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "skateboard",
+      "mode": "dark",
+      "command": "/clawd-dark skateboard motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 4540,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "wand",
+      "mode": "dark",
+      "command": "/clawd-dark wand motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 5746,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "lightbulb",
+      "mode": "dark",
+      "command": "/clawd-dark lightbulb motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 4777,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "magnifier",
+      "mode": "dark",
+      "command": "/clawd-dark magnifier motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 8510,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "dizzy",
+      "mode": "dark",
+      "command": "/clawd-dark dizzy motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 8744,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "book",
+      "mode": "dark",
+      "command": "/clawd-dark book motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 6530,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "bubble",
+      "mode": "dark",
+      "command": "/clawd-dark bubble motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9160,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "cape",
+      "mode": "dark",
+      "command": "/clawd-dark cape motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9658,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    },
+    {
+      "scene": "kite",
+      "mode": "dark",
+      "command": "/clawd-dark kite motion",
+      "dimensions": "1707x1019",
+      "solidCoralPixels": 9296,
+      "review": "drawn; character, accessories, side framing and chat readability passed"
+    }
+  ]
+}
