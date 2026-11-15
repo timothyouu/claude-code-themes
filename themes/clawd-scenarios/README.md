@@ -36,7 +36,7 @@ The gallery offers all scenes, light/dark appearance, motion/still controls, a c
 
 The freckled-v5 artwork takes its overall room identity from the original rainy-window reference: continuous cream lighting, a limited set of colors, small defined furnishings, fine texture on objects, and a sparse quiet center. The wall is a smooth gradient with cool upper-right light, rose upper-left light, warm floor light, and subtle edge shading. It has no wallpaper dots. Dark mode uses navy and plum lighting.
 
-Furniture is about 20% smaller than the preceding layout. Rain, steam, records, bubbles, and other details move locally at the sides. In the skatepark, one rider moves and two spectators stay still.
+Furniture occupies two 38% side viewports with a 760-unit scene height. Rain, steam, records, bubbles, and other details move locally at the sides. In the skatepark, one rider moves and two spectators stay still.
 
 I drew the rooms from the supplied Clawd references and compiled them into SVG patterns. The texture helper adapts the actual rainy-window recipe from [ishuagrawal/claude-code-themes](https://github.com/ishuagrawal/claude-code-themes) at revision `ae7d9d6`. It retains the five-density recipe, dotted lines, and layered halftone edges, but scales the original 6px pitch and radii by 0.45 for a finer 2.7px object pattern. The texture pixels are adapted rather than copied at their original size. Its MIT notice is retained in `hooks/reference-texture.LICENSE` and the repository notice.
 
@@ -48,7 +48,7 @@ The renderer guards plugin ownership and scene IDs, supports current `scene` and
 
 I reloaded the current freckled-v5 plugin in Claude Desktop 5.11492.5.0 with Claude Code 2.1.325 on Windows. Coffee rendered in light and dark/auto appearance with the full-canvas gradient, smaller furniture, readable chat, and no flat stripe. Eight new light-mode frames spanning 5.55 seconds confirm visible rain and steam.
 
-Earlier revisions passed native checks for all twelve rooms, still mode, off/on restoration, rider movement, and stationary spectators. Those results do not claim that every scene was retested natively after the latest layout change.
+I also tested all eleven other scenes in the same maximized 1707 x 1019 window, in light and dark modes. Side framing, visible environmental motion, and chat readability passed. Two dark frames per scene confirm motion outside mascot-eye regions, with the skateboard rider included intentionally. No visual fixes were needed. See the [native dark overview](../../assets/clawd-scenarios/native-all-scenes-dark.png), [light overview](../../assets/clawd-scenarios/native-all-scenes-light.png), and [capture results](../../assets/clawd-scenarios/native-all-scenes-results.json). Still mode and off/on restoration retain earlier native verification.
 
 See the [native café motion capture](../../assets/clawd-scenarios/native-motion.gif) and [reference comparison](../../assets/clawd-scenarios/texture-comparison.png). Exported comparison images do not establish native behavior.
 
@@ -73,7 +73,3 @@ Generating optional PNG previews requires an existing Sharp installation. Neithe
 ```sh
 node scripts/export-clawd-images.mjs --sharp=/absolute/path/to/sharp
 ```
-
-The latest layout widens each side viewport from 25% to 35% and uses an 800-unit scene height so the artwork occupies more of the screen. The centered 680px chat mask and fine object texture remain unchanged. Reloaded and visually checked the expanded Coffee layout in Claude Desktop; the linked motion GIF predates this layout-only change. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
-
-The current layout uses 38% side viewports and a 760-unit scene height, bringing the scenery slightly farther inward. Tested the installed Coffee scene in a maximized 1707 x 1019 Claude Desktop window, in both dark automatic and light modes. Chat remains readable; rain and steam remain active. Claude was left maximized. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.

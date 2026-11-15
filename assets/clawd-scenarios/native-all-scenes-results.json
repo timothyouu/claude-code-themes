@@ -1,0 +1,130 @@
+{
+  "rendererCommit": "02591d42d479dd14702d25b3ee94d4cd40f3955f",
+  "nativeWindow": "maximized 1707x1019",
+  "sceneCount": 11,
+  "captures": 33,
+  "method": "Two native dark frames separated by about 1.8s, plus one native light frame for each scene. Pixel changes are counted only in side regions above mascot eyes, except skateboard where the rider is the intended motion. Private transcript and composer are excluded from exported overview sheets.",
+  "scenes": [
+    {
+      "scene": "heart",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 313,
+        "right": 654
+      },
+      "pairIntervalMs": 1821,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "headphones",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 789,
+        "right": 670
+      },
+      "pairIntervalMs": 1855,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "skateboard",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 202,
+        "right": 17182
+      },
+      "pairIntervalMs": 1899,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": false
+    },
+    {
+      "scene": "wand",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 67,
+        "right": 233
+      },
+      "pairIntervalMs": 1893,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "lightbulb",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 544,
+        "right": 67
+      },
+      "pairIntervalMs": 1874,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "magnifier",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 685,
+        "right": 2885
+      },
+      "pairIntervalMs": 1841,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "dizzy",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 1064,
+        "right": 680
+      },
+      "pairIntervalMs": 1851,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "book",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 175,
+        "right": 190
+      },
+      "pairIntervalMs": 1859,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "bubble",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 153,
+        "right": 1195
+      },
+      "pairIntervalMs": 1862,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "cape",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 1000,
+        "right": 1002
+      },
+      "pairIntervalMs": 1871,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    },
+    {
+      "scene": "kite",
+      "dimensions": "1707x1019",
+      "darkMotionChangedPixels": {
+        "left": 462,
+        "right": 596
+      },
+      "pairIntervalMs": 1871,
+      "visualReview": "side coverage, chat readability and localized motion passed in maximized window",
+      "blinkRegionExcluded": true
+    }
+  ]
+}

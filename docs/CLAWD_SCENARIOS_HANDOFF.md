@@ -8,7 +8,7 @@ The latest artwork is freckled-v5. The user asked for the original rainy-window 
 
 The light wall uses the original reference's top, middle, and bottom cream colors: `#f2ece2`, `#efe7db`, and `#eedfca`. Cool upper-right light, rose upper-left light, warm floor light, and subtle edge shading cover the whole canvas. Dark mode uses a navy/plum equivalent. There are no wallpaper dots.
 
-Furniture occupies the two 38% side viewports. An 800-unit scene height gives it more screen coverage while retaining the fine object texture. Only artwork beneath the centered 680px transcript lane is masked to 20% opacity. The background remains continuous through the lane, without a flat veil stripe.
+Furniture occupies the two 38% side viewports. A 760-unit scene height gives it more screen coverage while retaining the fine object texture. Only artwork beneath the centered 680px transcript lane is masked to 20% opacity. The background remains continuous through the lane, without a flat veil stripe.
 
 The texture helper adapts `dotPaint`, `dotted`, `dline`, and `halftone` from the actual rainy-window source in `ishuagrawal/claude-code-themes`, commit `ae7d9d6d9fb98b2409d26d405dfbc230f2be864a`. It retains the five-density relationships and scales the original 6px pitch and radii by 0.45, producing a finer 2.7px object pattern. The original radii were 2.6, 2.1, 1.6, 1.15, and 0.75; current pixels are scaled adaptations, not an exact-size copy. MIT attribution remains in `hooks/reference-texture.LICENSE` and the repository notice.
 
@@ -33,7 +33,25 @@ The repository also has a marketplace entry, a self-contained preview gallery, P
 
 Current freckled-v5 native verification used Windows Claude Desktop 5.11492.5.0 with Claude Code 2.1.325. After reloading the plugin, Coffee rendered in dark/auto and light appearance with continuous full-canvas lighting, smaller defined furnishings, readable chat, and no flat stripe. Eight new light-mode frames spanning 5.55 seconds show active rain and steam.
 
-All twelve rooms, still mode, off/on restoration, and skateboard movement with fixed spectators were verified natively on earlier revisions. The preceding skateboard capture pair showed about eight screen pixels of rider movement. These are historical results, not a claim that all twelve freckled-v5 scenes were retested in the app.
+I tested the other eleven scenes in a maximized 1707 x 1019 Claude Desktop window in both light and dark appearance. I saved 33 native captures: a dark motion pair and one light frame per scene. Side framing and transcript readability passed visual review in every scene. The dark pairs show environmental changes outside mascot-eye regions, so a blink alone cannot pass the motion check. The skateboard pair includes the rider intentionally. No artwork or animation changes were needed.
+
+The [dark overview](../assets/clawd-scenarios/native-all-scenes-dark.png), [light overview](../assets/clawd-scenarios/native-all-scenes-light.png), and [capture results](../assets/clawd-scenarios/native-all-scenes-results.json) contain the evidence. Overview sheets contain only the native illustrated margins; the private transcript is excluded. Raw full-window captures remain local. The source tested is commit `02591d42d479dd14702d25b3ee94d4cd40f3955f`.
+
+| Scene | Observed motion | Changed side pixels | Pair interval |
+| --- | --- | ---: | ---: |
+| heart | Floating hearts | 967 | 1821 ms |
+| headphones | Record rotation and equalizer | 1,459 | 1855 ms |
+| skateboard | Moving rider and dust; fixed spectators | 17,384 | 1899 ms |
+| wand | Orbiting sparkles and twinkles | 300 | 1893 ms |
+| lightbulb | Pulsing lamp halos | 611 | 1874 ms |
+| magnifier | Clipped window rain | 3,570 | 1841 ms |
+| dizzy | Orbiting stars | 1,744 | 1851 ms |
+| book | Reading-lamp dust | 365 | 1859 ms |
+| bubble | Rising bubbles | 1,348 | 1862 ms |
+| cape | Drifting clouds | 2,002 | 1871 ms |
+| kite | Swaying kite tails | 1,058 | 1871 ms |
+
+Still mode and off/on restoration passed native checks on earlier revisions; these controls were unchanged in this pass. Coffee had already passed the same maximized light/dark check.
 
 The [earlier native café motion capture](../assets/clawd-scenarios/native-motion.gif) shows actual app frames. The [reference comparison](../assets/clawd-scenarios/texture-comparison.png) compares the artwork with the actual upstream image. Comparison exports alone do not establish native rendering or motion.
 
@@ -56,7 +74,3 @@ Later texture, lighting, scale, and motion changes followed explicit user feedba
 The GitHub branch and PR are intended for review before merging. No merge is part of this handoff. The user can use the locally installed plugin; installation from the default marketplace branch will include it after the PR is merged. Recheck scenes if Claude's early-access mod API changes.
 
 An older inline Golden Gate build also loads in the existing session. Its `/golden-gate off` returned help instead of disabling that older mod. Reapplying `/clawd-scene coffee` restored Clawd successfully. A new-session ordering conflict was not reproduced, and the older inline mod was not edited or removed.
-
-The latest layout widens each side viewport from 25% to 35% and uses an 800-unit scene height so the artwork occupies more of the screen. The centered 680px chat mask and fine object texture remain unchanged. Reloaded and visually checked the expanded Coffee layout in Claude Desktop; the linked motion GIF predates this layout-only change. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
-
-The current layout uses 38% side viewports and a 760-unit scene height, bringing the scenery slightly farther inward. Tested the installed Coffee scene in a maximized 1707 x 1019 Claude Desktop window, in both dark automatic and light modes. Chat remains readable; rain and steam remain active. Claude was left maximized. All 18 tests, strict SDK TypeScript, and 72-output SVG checks passed.
