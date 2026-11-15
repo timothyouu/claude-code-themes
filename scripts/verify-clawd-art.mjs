@@ -467,7 +467,7 @@ def check_scene(document, root):
     assert 'room-print' not in patterns and not any(element.get('data-texture') == 'wall-print' for element in root.iter()), label + ': background wallpaper dots must be absent'
     definitions = next(element for element in root if name(element) == 'defs')
     gradients = {element.get('id'): element for element in root.iter() if name(element) in ('radialGradient','linearGradient')}
-    assert set(gradients) == {'room-wall','room-cool','room-rose','room-floor','room-corner'}, label + ': background must use only its five controlled continuous gradients'
+    assert set(gradients) == {'room-wall','room-cool','room-rose','room-floor','room-corner','composer-blend'}, label + ': background must use only its controlled gradients'
     assert all(element in definitions for element in gradients.values()), label + ': background gradients must be defined directly at root'
     wall = gradients['room-wall']
     assert name(wall) == 'linearGradient' and [wall.get(key) for key in ('x1','y1','x2','y2')] == ['0','0','0','1'], label + ': wall must shade continuously from top to bottom'
@@ -503,12 +503,18 @@ def check_scene(document, root):
     assert len(margins) == 2 and all(name(element) == 'svg' and element.get('width') == '38%' for element in margins) and sorted(element.get('x') for element in margins) == ['0','62%'], label + ': art margins must leave the central 24% empty'
     for margin in margins:
         side = 'left' if margin.get('x') == '0' else 'right'
-        expected_box = '0 20 320 760' if side == 'left' else '-60 20 320 760'
+        expected_box = '-150 20 320 1000' if side == 'left' else '-60 20 320 1000'
         assert margin.get('overflow') == 'hidden' and margin.get('viewBox') == expected_box, label + ': complete rooms must render at the selected smaller scale'
         validate_art({'label':label,'kind':'scene','paint_values':paints},margin,patterns)
         authored = [element for element in margin if element.get('data-dither')]
         assert len(authored) == 1 and canonical(authored[0],paints) == canonical(art_sources[document['scene']+'/'+side][0],paints), label + ': room/body/eye geometry changed beyond blink wrapping'
-    assert all(element is definitions or element in background or element in art_groups for element in root), label + ': unexpected graphics could introduce a stripe or escape the art margins'
+    footer = [element for element in root if name(element) == 'svg' and element.get('y') == '100%']
+    assert len(footer) == 1 and footer[0].get('overflow') == 'visible' and len(footer[0]) == 1, label + ': footer blend must be bottom anchored'
+    fade = gradients['composer-blend']
+    assert [stop.get('stop-color') for stop in fade] == [paints['wallmid']]*3, label + ': footer must match native surface colors'
+    assert [stop.get('stop-opacity','1') for stop in fade] == ['0','1','1'], label + ': footer blend must become opaque before expanded composer'
+    assert footer[0][0].get('y') == '-280' and footer[0][0].get('height') == '280' and footer[0][0].get('fill') == 'url(#composer-blend)', label + ': footer blend must remain within reserved clearance'
+    assert all(element is definitions or element in background or element in art_groups or element in footer for element in root), label + ': unexpected graphics could introduce a stripe or escape the art margins'
     labels = [element.get('data-motion') for element in root.iter() if element.get('data-motion')]
     assert sorted(labels) == (sorted([document['scene']+'-left',document['scene']+'-right']) if document['motion'] else []), label + ': environmental motion must occur once per side only when enabled'
     actors = [element for element in root.iter() if element.get('data-actor')]

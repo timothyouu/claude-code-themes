@@ -88,6 +88,24 @@ test('all twelve scene switches apply colors and backdrop and persist across ses
   assert.equal(restart.sets.at(-1).backdrop.scene, 'clawd-scenarios-kite-auto-motion');
 });
 
+test('all scenes match native footer colors and reserve composer clearance', async () => {
+  const mod=await loadTheme();
+  const { paletteFor, buildScene }=await import(pathToFileURL(path.join(plugin,'hooks/scene.mjs')));
+  for(const scene of expected) for(const appearance of ['light','dark','auto']){
+    const look=mod.lookFor({scene,appearance,motion:true,enabled:true});
+    assert.equal(look.backdrop.glass, false);
+    const svg=buildScene(scene,appearance,true);
+    assert.match(svg,/composer-blend/);
+    assert.match(svg,/viewBox="-150 20 320 1000"/);
+    assert.match(svg,/viewBox="-60 20 320 1000"/);
+    assert.equal(look.colors.inputs.light['gray-20'].toLowerCase(),paletteFor(scene,'light').wallmid);
+    assert.equal(look.colors.inputs.dark['gray-900'].toLowerCase(),paletteFor(scene,'dark').wallmid);
+    assert.equal(look.colors.inputs.light['gray-10'].toLowerCase(),paletteFor(scene,'light').wallmid);
+    assert.equal(look.colors.inputs.dark['gray-850'].toLowerCase(),paletteFor(scene,'dark').wallmid);
+    assert.equal(look.overrideColorScheme,appearance==='auto'?undefined:appearance);
+  }
+});
+
 test('off survives restart; on preserves scene, appearance and motion', async () => {
   const mod = await loadTheme();
   const store = new Map();
@@ -192,8 +210,8 @@ test('continuous gradient wall stays behind protected chat furniture', async () 
     assert.match(svg, /<rect x="-340" width="680" height="100%" fill="black" opacity=".80"/);
     assert.match(svg, /<svg x="0" y="0" width="38%"/);
     assert.match(svg, /<svg x="62%" y="0" width="38%"/);
-    assert.match(svg, /viewBox="0 20 320 760"/);
-    assert.match(svg, /viewBox="-60 20 320 760"/);
+    assert.match(svg, /viewBox="-150 20 320 1000"/);
+    assert.match(svg, /viewBox="-60 20 320 1000"/);
     // Bound every possible continuous-lighting color, then allow 20% extreme
     // artwork through the mask. Peaks are conservatively allowed to coincide.
     const walls = ['walltop','wallmid','wallbottom'].map(role => channels(palette[role]));
