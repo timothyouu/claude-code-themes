@@ -1,6 +1,6 @@
 # Claude Code Themes
 
-I built this repository to share Golden Gate Dither, a Claude Code mod that adds an animated, dithered Golden Gate Bridge scene and a matching color palette to the Code tab.
+Animated themes for the Code tab of Claude Desktop: Golden Gate Dither and a collection of twelve Clawd scenarios. Each theme includes a matching light and dark palette.
 
 ## Install
 
@@ -14,6 +14,43 @@ In a local session in Claude Desktop's Code tab, run:
 Then open a new Code session and send a message. The backdrop appears after the session's first message.
 
 This mod needs Claude Code 2.1.325 or later in the Code tab. I tested it on Windows with Claude Desktop 5.11492.5.0 and Claude Code 2.1.325. I have not verified the mobile app or other platforms.
+
+## Clawd Scenarios
+
+Twelve worlds inspired by [Clawd's character stickers](https://www.stickermule.com/claudecode), [Claude FM](https://www.youtube.com/watch?v=tRsQsTMvPNg), and the edge compositions in [Ishu Agrawal's rainy-window theme](https://github.com/ishuagrawal/claude-code-themes). The scenery stays in the margins and leaves the middle clear for conversation.
+
+```text
+/plugin install clawd-scenarios@claude-code-themes
+```
+
+Open a new Code session, send its first message, then choose a scene:
+
+```text
+/clawd-scene coffee
+/clawd-scene headphones dark
+/clawd-scene book light still
+```
+
+![Clawd's rainy café in light appearance](assets/clawd-scenarios/coffee-light.png)
+
+The furniture uses colored washes and round halftone detail inspired by the reference theme. Rain, steam, records, bubbles, clouds, and other small details animate locally. The skatepark has one moving rider and two stationary spectators.
+
+| Character | Scenario |
+| --- | --- |
+| Coffee | A rainy neighborhood café with an espresso bar |
+| Heart | A rooftop flower shop and love-letter post |
+| Headphones | A late-night listening studio with vinyl and speakers |
+| Skateboard | A sunset skatepark with ramps and street details |
+| Wand | A candlelit wizard study with potions and stars |
+| Lightbulb | An inventor's workbench with tools and lamps |
+| Magnifier | A detective's office with an evidence board |
+| Dizzy | A dreamy planetarium with slow celestial orbits |
+| Book | A quiet library with shelves and a reading chair |
+| Bubble | A glass conservatory and tiled fountain |
+| Cape | A rooftop lookout over a city skyline |
+| Kite | A breezy hilltop with kites and a picnic |
+
+Open [the local interactive gallery](assets/clawd-scenarios/preview.html) after cloning or downloading the repository. It includes all twelve scenes, light/dark and motion controls, a clearly labeled sample conversation, and SVG downloads. These previews are browser renders, not proof of Claude Desktop behavior. See [theme commands and compatibility](themes/clawd-scenarios/README.md).
 
 ## Golden Gate Dither
 
